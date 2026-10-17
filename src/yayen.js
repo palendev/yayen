@@ -1,24 +1,34 @@
-/* Yayen: el asistente del Inicio (prototipo aprobado: https://claude.ai/artifact/8Zkf8FcLQExVfrLHCiu7qV).
-   - En la tarjeta de estado: personaje con dos hojas y su globo, con la cara y el mensaje según Dash.overall().
-   - Un toque: abre sus opciones en órbita y responde EN LOCAL con los datos de /api/status, en una nube
-     blanca de pensamiento y en voz alta (voz del navegador; la voz propia con Piper llega después).
-   - Mantener pulsado: hablar con Hermes. Hasta que Hermes esté enlazado lo dice y no escucha nada.
-   - Modo ligero automático en equipos con poca RAM o pocos núcleos (la Wyse): sin animaciones continuas.
-   No guarda nada en el servidor; la preferencia de voz vive en este navegador. */
-(function () {
+/*! Yayen · asistente con personaje para paneles y dashboards · MIT · https://github.com/palendev/yayen
+ *
+ *   <link rel="stylesheet" href="yayen.css">
+ *   <script src="yayen.js"></script>
+ *   const yy = Yayen.mount(document.querySelector('#yayen'), {
+ *     status: () => ({ level: 'ok', title: 'Todo en orden', text: 'Todo tranquilo por aquí.' }),
+ *     options: [{ id: 'news', label: '¿Qué hay de nuevo?' }],
+ *     answer: async id => ({ title: '¡Todo bien!', text: 'Todo está bien. Todo en orden.' }),
+ *   });
+ *
+ * Sin dependencias ni build. Ver README.md y docs/INTEGRAR.md.
+ */
+(function (root) {
   'use strict';
-  const { esc, ago } = Dash.util;
-  const I = Dash.icons;
-  const HOLD_MS = 450;
-  const store = {
-    get(k, def) { try { const v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); } catch (_) { return def; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* sin almacenamiento: solo esta sesión */ } },
-  };
-  const S = { menu: false, hermes: false, temp: null, rest: false, line: 0, voice: store.get('yayen.voz', true), target: null };
-  const lite = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency || 4) <= 2;
-  document.body.classList.toggle('yy-lite', !!lite);
 
-  /* ---------- el personaje (SVG 200×200) ---------- */
+  /* Iconos (24×24, trazo) para las opciones. Puedes pasar los tuyos como cadena SVG. */
+  const p = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const ICONS = {
+    refresh: p('<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/>'),
+    bell: p('<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>'),
+    server: p('<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01M11 7.5h6M11 16.5h6"/>'),
+    eyeOff: p('<path d="m3 3 18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a16 16 0 0 1-3.2 3.8M6.2 6.2C3.5 8 2 12 2 12s3.5 6 10 6c1 0 2-.2 2.9-.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'),
+    file: p('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2"/>'),
+    users: p('<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM20 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>'),
+    moon: p('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'),
+    speaker: p('<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>'),
+    send: p('<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>'),
+    star: p('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
+  };
+
+  /* ---------- el personaje (SVG 200×200): dos hojas, visor, cuerpo con rayas; caras por data-face ---------- */
   function svg(n) {
     const W = '#f5f5f7';
     const eye = (d, cls) => `<g class="${cls}" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -80,305 +90,249 @@
     </g></svg>`;
   }
 
-  /* ---------- datos → qué dice ---------- */
-  function isNight() {
-    const h = new Date().getHours(), { nightFrom: a, nightTo: b } = Dash.settings;
-    return a > b ? h >= a || h < b : h >= a && h < b;
-  }
-  const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; };
-  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
-  const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
-
-  function mood(d) {
-    const o = Dash.overall(d);
-    const sleeping = S.rest || (o.level === 'ok' && Dash.settings.nightDim && isNight());
-    const face = S.temp || (Dash.settings.recording ? 'cool' : o.level === 'error' ? 'error' : o.level === 'warn' ? 'warn' : sleeping ? 'sleep' : 'ok');
-    const badge = o.level === 'error' ? ['error', '!'] : o.level === 'warn' ? ['warn', '!'] : sleeping ? ['night', 'z'] : ['ok', '✓'];
-    return { o, face, badge, sleeping };
-  }
-
-  /* Habla como una persona, no como un informe: frases cortas, variadas y con lo importante primero. */
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const pick = list => list[Math.floor(Math.random() * list.length)];
-  const lower = s => String(s || '').charAt(0).toLowerCase() + String(s || '').slice(1);
-  const issueText = x => `${x.name} está ${lower(x.end || x.text || 'con problemas')}`;
-  const nodesOf = d => (d.integrations.proxmox?.data?.nodes || []).filter(n => n.status === 'online' && n.maxmem);
-  const busiest = d => nodesOf(d).sort((a, b) => b.mem / b.maxmem - a.mem / a.maxmem)[0];
-
-  function okLines(d) {
-    const lines = [`${greet()}, Jordan. Todo tranquilo por aquí.`];
-    const pages = d.checks.filter(c => c.kind === 'page'), apis = d.checks.filter(c => c.kind === 'api');
-    if (pages.length) lines.push(`Las ${pages.length} páginas están arriba${apis.length ? ' y las APIs responden' : ''}. Todo en orden.`);
-    const yt = d.integrations.youtube?.data;
-    if (yt?.subscribers != null) lines.push(`JordanTechRD ya va por ${Dash.util.number(yt.subscribers)} suscriptores. ¡Vamos bien!`);
-    const p = d.integrations.palendev?.data;
-    if (p?.last_news) lines.push(`palen.dev publicó ${ago(p.last_news)}. Las noticias van al día.`);
-    const top = busiest(d);
-    if (top) lines.push(`${top.node} anda al ${pct(top.mem, top.maxmem)} % de RAM. Le estoy echando un ojo.`);
-    if (!Dash.settings.recording) lines.push('¿Vas a grabar? Tócame y escondo las IPs.');
-    return lines;
-  }
-
-  function heroText(d, m) {
-    if (Dash.settings.recording) return ['Grabando', 'Tengo las gafas puestas: no se ve ni una IP.'];
-    const first = m.o.list[0];
-    if (m.o.level !== 'ok') return [m.o.errors ? `Ojo, ${plural(m.o.errors, 'problema', 'problemas')}` : plural(m.o.warns, 'aviso', 'avisos'),
-      `${issueText(first)}. Toca aquí y te llevo.`];
-    if (m.sleeping) return ['Descansando', 'Ya es tarde. Bajé el brillo, pero sigo pendiente.'];
-    const lines = okLines(d);
-    return ['Todo en orden', lines[S.line % lines.length]];
-  }
-
-  /* ---------- respuestas de las opciones (solo datos locales) ---------- */
-  const answer = {
-    // «¿Qué hay de nuevo?»: primero lo que falla; si no hay nada, «todo bien» y lo más interesante del día.
-    what(d) {
-      const o = Dash.overall(d), first = o.list[0];
-      if (first) {
-        const more = o.list.length > 1 ? ` Y hay ${plural(o.list.length - 1, 'cosa más', 'cosas más')} en la lista.` : ' Lo demás va bien.';
-        return { t: o.errors ? 'Ojo con esto' : 'Un aviso', p: `Mira, Jordan: ${issueText(first)}.${more} Toca la nube y te llevo.`, go: first.go, face: first.level === 'error' ? 'error' : 'warn' };
-      }
-      const news = [];
-      const yt = d.integrations.youtube?.data;
-      if (yt?.new_comments) news.push(`Tienes ${plural(yt.new_comments, 'comentario nuevo', 'comentarios nuevos')} en YouTube.`);
-      const back = d.events.find(e => e.level === 'ok' && Date.now() / 1000 - e.ts < 3 * 3600);
-      if (back) news.push(`${back.service} tuvo un tropiezo hace un rato, pero ya volvió.`);
-      const p = d.integrations.palendev?.data;
-      if (p?.last_news) news.push(`La última noticia de palen.dev salió ${ago(p.last_news)}.`);
-      const bk = d.integrations.proxmox?.data?.latest_backup;
-      if (bk?.status === 'OK') news.push(`La última copia terminó bien, ${ago(bk.starttime)}.`);
-      const open = pick(['Todo está bien, Jordan. Todo en orden.', 'Todo tranquilo, Jordan. Nada que reportar.', 'Todo bien por aquí, Jordan. Todo en orden.']);
-      return { t: pick(['¡Todo bien!', 'Nada grave', 'Tranquilo']), p: [open, ...news.slice(0, 2)].join(' '), face: 'happy' };
-    },
-    srv(d) {
-      const pve = d.integrations.proxmox?.data;
-      if (!pve) return { t: 'Servidores', p: `Ahora mismo no llego a Proxmox: ${lower(d.integrations.proxmox?.error || 'no está configurado')}.`, face: 'warn' };
-      const down = pve.nodes.filter(n => n.status !== 'online'), top = busiest(d);
-      const on = pve.guests.filter(g => g.status === 'running').length, off = pve.guests.length - on;
-      const parts = [down.length ? `Ojo: ${down.map(n => n.node).join(' y ')} no responde.` : pick(['Los servidores van bien.', 'Los nodos están tranquilos.'])];
-      if (top) parts.push(pct(top.mem, top.maxmem) >= 85 ? `${top.node} anda alto de memoria, al ${pct(top.mem, top.maxmem)} %; lo vigilo.` : `El más cargado es ${top.node}, con ${pct(top.mem, top.maxmem)} % de RAM.`);
-      parts.push(off ? `Tienes ${on} máquinas encendidas y ${off} apagadas.` : `Las ${on} máquinas están encendidas.`);
-      return { t: 'Servidores', p: parts.join(' ') + ' Toca la nube y te llevo.', go: ['proxmox'], face: down.length ? 'error' : null };
-    },
-    redes(d) {
-      const yt = d.integrations.youtube?.data, acc = d.integrations.social?.data?.accounts || [];
-      const parts = [];
-      if (yt) parts.push(`En YouTube vas por ${Dash.util.number(yt.subscribers)} suscriptores${yt.new_comments ? ` y hoy te dejaron ${plural(yt.new_comments, 'comentario', 'comentarios')}` : ''}.`);
-      acc.filter(a => a.connected).forEach(a => parts.push(`En ${a.network_name}, ${a.handle} tiene ${Dash.util.number(a.followers)} seguidores.`));
-      const off = acc.filter(a => !a.connected && !a.pending);
-      if (off.length) parts.push(`${[...new Set(off.map(a => a.network_name))].join(' y ')} todavía no ${off.length > 1 ? 'están conectados' : 'está conectado'}.`);
-      return { t: 'Redes', p: parts.join(' ') || 'Todavía no tengo ninguna red conectada.', go: ['canal'] };
-    },
-    news(d) {
-      const p = d.integrations.palendev?.data;
-      if (!p) return { t: 'palen.dev', p: `No consigo llegar a palen.dev: ${lower(d.integrations.palendev?.error || 'no está configurado')}.`, face: 'warn', go: ['palendev'] };
-      const stale = Dash.palenStale ? Dash.palenStale(d) : false, drafts = p.cms?.noticias?.borradores;
-      const head = stale ? `Ojo, palen.dev va atrasada: la última noticia salió ${ago(p.last_news)}.` : `palen.dev va al día: la última noticia salió ${p.last_news ? ago(p.last_news) : 'hace poco'}.`;
-      return { t: 'palen.dev', p: head + (drafts ? ` Tienes ${plural(drafts, 'borrador esperando', 'borradores esperando')} en el CMS.` : ''), face: stale ? 'warn' : null, go: ['palendev'] };
-    },
-    summary(d) {
-      const o = Dash.overall(d);
-      if (o.level === 'ok') return { t: 'Listo', p: pick(['Listo, ya revisé todo. Todo en orden, Jordan.', 'Ya está. Revisé páginas, APIs y servidores, y todo responde.']), face: 'happy' };
-      return { t: 'Ya revisé', p: `Ya revisé. Lo más importante: ${issueText(o.list[0])}.${o.list.length > 1 ? ` Hay ${plural(o.list.length - 1, 'cosa más', 'cosas más')}.` : ''} Toca la nube y te llevo.`,
-        go: o.list[0].go, face: o.errors ? 'error' : 'warn' };
-    },
+  const store = {
+    get(k, def) { try { const v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); } catch (_) { return def; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { /* sin almacenamiento */ } },
   };
-
-  /* ---------- voz (navegador por ahora) ---------- */
-  const synth = window.speechSynthesis;
-  const talking = on => document.querySelectorAll('.yy').forEach(y => y.classList.toggle('talk', on));
-  function speak(text) {
-    if (!S.voice || !synth) return;
-    try {
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text.replace(/·/g, ',').replace(/(\d+)\s*%/g, '$1 por ciento'));
-      const voices = synth.getVoices();
-      const v = voices.find(x => /^es[-_](DO|MX|US|419)/i.test(x.lang)) || voices.find(x => /^es/i.test(x.lang));
-      if (v) u.voice = v;
-      u.lang = v?.lang || 'es-ES'; u.rate = 1; u.pitch = 1.15;
-      u.onstart = () => talking(true);
-      u.onend = u.onerror = () => talking(false);
-      synth.speak(u);
-    } catch (_) { talking(false); }
-  }
-
-  /* ---------- capa de opciones ---------- */
-  const OPTS = [
-    { id: 'check', label: 'Revisar todo', icon: I.refresh },
-    { id: 'what', label: '¿Qué hay de nuevo?', icon: I.bell },
-    { id: 'srv', label: 'Servidores', icon: I.server },
-    { id: 'rec', label: 'Grabar', icon: I.eyeOff },
-    { id: 'news', label: 'palen.dev', icon: I.file },
-    { id: 'redes', label: 'Redes', icon: I.users },
-    { id: 'rest', label: 'Descansa', icon: I.moon },
-  ];
-  // Diseño en unidades de la pantalla del rack (1280×400) o de teléfono (560×440); se escala al tamaño real.
-  const SPOTS = {
+  const SPOTS = { // posiciones de hasta 7 opciones alrededor de Yayen (unidades de diseño)
     full: { w: 1280, h: 400, cy: 190, rx: 320, ry: 150, p: [[-290, -95], [-330, 0], [-290, 95], [0, 150], [290, 95], [330, 0], [290, -95]] },
     compact: { w: 560, h: 440, cy: 232, rx: 205, ry: 160, p: [[-185, -105], [-210, 0], [-185, 105], [0, 155], [185, 105], [210, 0], [185, -105]] },
   };
-  let ov, stage, idleTimer = null, thinkTimer = null;
+  const ORDER = [0, 6, 1, 5, 2, 4, 3]; // con menos de 7, se reparten simétricas
+  let instances = 0;
 
-  function buildOverlay() {
-    ov = document.createElement('div');
+  function mount(el, cfg = {}) {
+    const n = ++instances;
+    const o = Object.assign({
+      name: 'Yayen',
+      status: () => ({ level: 'ok', title: 'Todo en orden', text: '' }),
+      options: [],
+      answer: async () => ({ title: '', text: '' }),
+      onNavigate: null,
+      voice: { url: null, browser: true },
+      hermes: { url: null, headers: {} },
+      holdMs: 450,
+      idleCloseMs: 45000,
+      lite: 'auto',
+      rotateMs: 9000,
+    }, cfg);
+    const S = { menu: false, temp: null, target: null, voice: store.get('yayen.voz', true), line: 0 };
+    const lite = o.lite === 'auto' ? (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency || 4) <= 2 : !!o.lite;
+    document.documentElement.classList.toggle('yy-lite', !!lite);
+
+    /* ---------- tarjeta ---------- */
+    el.classList.add('yy-hero');
+    el.innerHTML = `<div class="yy-wrap"><div class="yy" role="button" tabindex="0" aria-label="${esc(o.name)}: toca para ver opciones, mantén pulsado para hablar">${svg(`${n}a`)}</div><span class="yy-badge ok">✓</span></div>
+      <button class="yy-say" type="button"><span class="yy-who">${esc(o.name)}</span><span class="yy-bub"><b data-k="t"></b><span data-k="p"></span></span></button>`;
+    const heroYy = el.querySelector('.yy');
+
+    /* ---------- capa de opciones ---------- */
+    const opts = o.options.slice(0, 7);
+    const ov = document.createElement('div');
     ov.className = 'yy-ov'; ov.setAttribute('aria-hidden', 'true');
     ov.innerHTML = `<div class="yy-stage">
-      <svg class="yy-orbit" preserveAspectRatio="none"><defs><linearGradient id="yy-orbit-g" x1="0" x2="1"><stop offset="0" stop-color="#2fb6ff"/><stop offset="1" stop-color="#a35cff"/></linearGradient></defs><ellipse/></svg>
+      <svg class="yy-orbit" preserveAspectRatio="none"><defs><linearGradient id="yy-orbit-g${n}" x1="0" x2="1"><stop offset="0" stop-color="#2fb6ff"/><stop offset="1" stop-color="#a35cff"/></linearGradient></defs><ellipse style="stroke:url(#yy-orbit-g${n})"/></svg>
       <div class="yy-cloud" role="status" aria-live="polite">
         <span class="yy-via"><i></i><span data-k="via">Local</span></span>
         <span class="yy-puffs" aria-hidden="true"><i class="p1"></i><i class="p2"></i><i class="p3"></i><i class="p4"></i><i class="p5"></i><i class="p6"></i><i class="p7"></i><i class="t1"></i><i class="t2"></i><i class="t3"></i></span>
-        <b><span data-k="t">¿Qué hacemos, Jordan?</span><span class="yy-dots"><i></i><i></i><i></i></span></b>
+        <b><span data-k="t"></span><span class="yy-dots"><i></i><i></i><i></i></span></b>
         <span class="yy-heard" data-k="heard" hidden></span>
-        <p data-k="p">Toca una opción.</p>
+        <p data-k="p"></p>
+        <form class="yy-ask" data-k="ask" hidden><input data-k="q" type="text" autocomplete="off" placeholder="Escríbele a Hermes…" aria-label="Mensaje para Hermes"><button type="submit" aria-label="Enviar">${ICONS.send}</button></form>
       </div>
-      <div class="yy yy-big" data-k="big" role="button" tabindex="0" aria-label="Yayen">${svg('b')}</div>
-      <div class="yy-opts">${OPTS.map((o, i) => `<button class="yy-opt ${i < 3 ? 'l' : i === 3 ? 'b' : 'r'}" type="button" data-opt="${o.id}"><i>${o.icon}<s></s></i><span>${o.label}</span></button>`).join('')}</div>
-      <button class="yy-voice" type="button" data-k="voice" aria-pressed="true" aria-label="Voz de Yayen">${I.speaker}<span>Voz</span></button>
+      <div class="yy yy-big" role="button" tabindex="0" aria-label="${esc(o.name)}">${svg(`${n}b`)}</div>
+      <div class="yy-opts">${opts.map((x, i) => `<button class="yy-opt" type="button" data-opt="${esc(x.id)}"><i>${x.icon && x.icon.startsWith('<') ? x.icon : ICONS[x.icon] || ICONS.star}<s></s></i><span>${esc(x.label)}</span></button>`).join('')}</div>
+      <button class="yy-voice" type="button" aria-pressed="true" aria-label="Voz">${ICONS.speaker}<span>Voz</span></button>
     </div>`;
     document.body.appendChild(ov);
-    stage = ov.querySelector('.yy-stage');
+    const stage = ov.querySelector('.yy-stage'), big = ov.querySelector('.yy-big');
     const q = k => ov.querySelector(`[data-k="${k}"]`);
-    q('voice').addEventListener('click', () => { S.voice = !S.voice; store.set('yayen.voz', S.voice); if (!S.voice && synth) synth.cancel(); syncVoice(); });
-    ov.addEventListener('click', e => { if (e.target === ov || e.target === stage) close(); });
-    ov.querySelector('.yy-opts').addEventListener('click', e => { const b = e.target.closest('[data-opt]'); if (b) act(b.dataset.opt); });
-    ov.querySelector('.yy-cloud').addEventListener('click', () => { const go = S.target; close(); if (go) Dash.go(...go); });
-    press(q('big'), close, () => { touchIdle(); hermesHold(); });
-    syncVoice();
-    window.addEventListener('resize', layout);
-  }
-  const syncVoice = () => { const b = ov.querySelector('[data-k="voice"]'); b.setAttribute('aria-pressed', String(S.voice)); b.classList.toggle('off', !S.voice); };
 
-  function layout() {
-    if (!ov) return;
-    const z = parseFloat(document.body.style.zoom) || 1, W = innerWidth / z, H = innerHeight / z;
-    const L = SPOTS[W / H < 2 ? 'compact' : 'full'], k = Math.min(W / L.w, H / L.h);
-    Object.assign(stage.style, { width: `${L.w}px`, height: `${L.h}px`, transform: `translate(${(W - L.w * k) / 2}px, ${(H - L.h * k) / 2}px) scale(${k})` });
-    const cx = L.w / 2;
-    ov.querySelector('.yy-big').style.top = `${L.cy}px`;
-    const o = ov.querySelector('.yy-orbit'); o.setAttribute('viewBox', `0 0 ${L.w} ${L.h}`);
-    const e = o.querySelector('ellipse'); e.setAttribute('cx', cx); e.setAttribute('cy', L.cy); e.setAttribute('rx', L.rx); e.setAttribute('ry', L.ry);
-    [...ov.querySelectorAll('.yy-opt')].forEach((b, i) => {
-      const [dx, dy] = L.p[i];
-      Object.assign(b.style, { left: `${cx + dx}px`, top: `${L.cy + dy}px`, transitionDelay: S.menu ? `${i * 45}ms` : '0ms' });
-      b.style.setProperty('--fx', `${-dx}px`); b.style.setProperty('--fy', `${-dy}px`); b.style.setProperty('--d', `${i * 45}ms`);
-    });
-  }
-
-  const later = (fn, ms) => { clearTimeout(thinkTimer); thinkTimer = setTimeout(fn, ms); };
-  function touchIdle() { clearTimeout(idleTimer); idleTimer = setTimeout(close, 45000); }
-  function cloud(on, thinking = false) { ov.classList.toggle('answer', on); ov.classList.toggle('thinking', on && thinking); }
-  function via(hermes) { ov.classList.toggle('hermes', hermes); ov.querySelector('[data-k="via"]').textContent = hermes ? 'Hermes' : 'Local'; }
-  function say(r, asAnswer = true) {
-    ov.querySelector('[data-k="t"]').textContent = r.t || '';
-    ov.querySelector('[data-k="p"]').textContent = r.p || '';
-    S.target = r.go || null;
-    ov.classList.toggle('linked', !!S.target);
-    if (asAnswer) { cloud(true); speak(r.p || r.t); }
-  }
-  function bump(cls) {
-    document.querySelectorAll('.yy').forEach(y => { y.classList.remove(cls); void y.getBoundingClientRect(); y.classList.add(cls); setTimeout(() => y.classList.remove(cls), 1200); });
-  }
-
-  function open(hermes) {
-    if (!ov) buildOverlay();
-    S.menu = true; S.rest = false;
-    ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false');
-    ov.querySelector('[data-k="heard"]').hidden = true;
-    layout(); touchIdle();
-    if (hermes) return hermesHold();
-    via(false); cloud(false);
-    S.temp = 'happy'; paint(); bump('hop'); bump('flap');
-    const o = Dash.data ? Dash.overall(Dash.data) : null;
-    say({ t: pick(['¿Qué necesitas, Jordan?', 'Dime, Jordan.', '¿En qué te ayudo?']),
-      p: o && o.level === 'error' ? 'Hay algo caído; pregúntame qué hay de nuevo.' : 'Toca una opción, o mantenme pulsado para hablar con Hermes.' }, false);
-    later(() => { S.temp = null; paint(); }, 1300);
-  }
-  function close() {
-    if (!ov) return;
-    S.menu = false; S.hermes = false; S.temp = null; S.target = null;
-    clearTimeout(thinkTimer); clearTimeout(idleTimer);
-    if (synth) synth.cancel();
-    talking(false);
-    ov.classList.remove('on', 'answer', 'thinking', 'hermes', 'linked');
-    ov.setAttribute('aria-hidden', 'true');
-    layout(); paint();
-  }
-
-  function think(then, ms = 1100) {
-    via(false); ov.querySelector('[data-k="heard"]').hidden = true;
-    S.temp = 'think'; paint(); cloud(true, true); say({ t: pick(['Déjame ver', 'Un segundo', 'A ver']), p: '' }, false);
-    later(() => { S.temp = null; cloud(true); const r = then(); if (r) { say(r); if (r.face) { S.temp = r.face === 'happy' ? 'happy' : null; if (r.face === 'happy') { bump('hop'); setTimeout(() => { S.temp = null; paint(); }, 1400); } } } paint(); }, ms);
-  }
-
-  function act(id) {
-    touchIdle();
-    const d = Dash.data;
-    if (!d) return say({ t: 'Un momento', p: 'Todavía no me llegan los datos del panel. Dame un segundo.' });
-    if (id === 'check') { Dash.emit('check'); return think(() => answer.summary(Dash.data), 2600); }
-    if (id === 'rec') {
-      const next = !Dash.settings.recording;
-      return Promise.resolve(Dash.saveSettings({ recording: next }))
-        .then(() => { paint(); say(next ? { t: 'Modo grabación', p: 'Listo, me puse las gafas. Ya no se ve ninguna IP.' } : { t: 'Grabación apagada', p: 'Me quité las gafas; las IPs se ven otra vez.' }); })
-        .catch(err => say({ t: 'No pude', p: err.message, face: 'warn' }));
+    function layout() {
+      const W = innerWidth, H = innerHeight;
+      const L = SPOTS[W / H < 2 ? 'compact' : 'full'], k = Math.min(W / L.w, H / L.h), cx = L.w / 2;
+      Object.assign(stage.style, { width: `${L.w}px`, height: `${L.h}px`, transform: `translate(${(W - L.w * k) / 2}px, ${(H - L.h * k) / 2}px) scale(${k})` });
+      big.style.top = `${L.cy}px`;
+      const orbit = ov.querySelector('.yy-orbit'), e = orbit.querySelector('ellipse');
+      orbit.setAttribute('viewBox', `0 0 ${L.w} ${L.h}`);
+      e.setAttribute('cx', cx); e.setAttribute('cy', L.cy); e.setAttribute('rx', L.rx); e.setAttribute('ry', L.ry);
+      const slots = ORDER.slice(0, opts.length).sort((a, b) => a - b);
+      [...ov.querySelectorAll('.yy-opt')].forEach((b, i) => {
+        const [dx, dy] = L.p[slots[i]];
+        b.classList.toggle('l', dx < 0); b.classList.toggle('r', dx > 0); b.classList.toggle('b', dx === 0);
+        Object.assign(b.style, { left: `${cx + dx}px`, top: `${L.cy + dy}px`, transitionDelay: S.menu ? `${i * 45}ms` : '0ms' });
+        b.style.setProperty('--fx', `${-dx}px`); b.style.setProperty('--fy', `${-dy}px`); b.style.setProperty('--d', `${i * 45}ms`);
+      });
     }
-    if (id === 'rest') { close(); S.rest = true; paint(); Dash.toast('Me quedo descansando. Tócame cuando me necesites.'); return; }
-    think(() => answer[id](Dash.data));
-  }
+    addEventListener('resize', layout);
 
-  /* Mantener pulsado = Hermes. Aún sin enlazar: lo dice y no abre el micrófono. */
-  function hermesHold() {
-    S.hermes = true; via(true); cloud(true);
-    S.temp = 'listen'; paint(); bump('flap');
-    const h = Dash.data?.integrations?.hermes;
-    say(h?.ok ? { t: 'Te escucho', p: 'Habla y suelta para enviar.' }
-      : { t: 'Todavía no hablo con Hermes', p: 'Cuando lo conectemos, mantenme pulsado y háblame; yo se lo paso. Por ahora, toca una opción.' });
-    later(() => { S.temp = null; paint(); }, 1600);
-  }
+    /* ---------- cara y tarjeta ---------- */
+    const allYy = () => [heroYy, big];
+    function current() {
+      const st = Object.assign({ level: 'ok', title: '', text: '' }, o.status() || {});
+      const lines = Array.isArray(st.text) ? st.text : [st.text];
+      return Object.assign(st, { text: lines[S.line % lines.length] || '' });
+    }
+    function paint() {
+      const st = current();
+      const face = S.temp || st.face || { error: 'error', warn: 'warn', sleep: 'sleep', ok: 'ok' }[st.level] || 'ok';
+      allYy().forEach(y => { y.dataset.face = face; });
+      const badge = el.querySelector('.yy-badge');
+      const b = { error: ['error', '!'], warn: ['warn', '!'], sleep: ['night', 'z'], ok: ['ok', '✓'] }[st.level] || ['ok', '✓'];
+      badge.className = `yy-badge ${b[0]}`; badge.textContent = b[1];
+      el.querySelector('[data-k="t"]').textContent = st.title;
+      el.querySelector('[data-k="p"]').textContent = st.text;
+      el.classList.toggle('night', st.level === 'sleep');
+      S.heroTarget = st.go || null;
+    }
+    const rotate = setInterval(() => { if (!S.menu) { S.line++; paint(); } }, o.rotateMs);
+    function bump(cls) { allYy().forEach(y => { y.classList.remove(cls); void y.getBoundingClientRect(); y.classList.add(cls); setTimeout(() => y.classList.remove(cls), 1200); }); }
 
-  /* Toque corto / pulsación larga sobre un elemento. */
-  function press(el, onTap, onHold) {
-    let timer = null, long = false;
-    el.addEventListener('pointerdown', e => {
-      long = false;
-      try { el.setPointerCapture(e.pointerId); } catch (_) { /* sin captura */ }
-      if (onHold) timer = setTimeout(() => { long = true; onHold(); }, HOLD_MS);
+    /* ---------- voz: primero la del servidor (Piper), si no la del navegador ---------- */
+    const synth = root.speechSynthesis;
+    const talking = on => allYy().forEach(y => y.classList.toggle('talk', on));
+    let seq = 0, audio = null, serverVoice = !!(o.voice && o.voice.url);
+    function stopVoice() { seq++; if (audio) { audio.pause(); audio = null; } if (synth) synth.cancel(); talking(false); }
+    function browserSpeak(text) {
+      if (!synth || o.voice?.browser === false) return;
+      try {
+        const u = new SpeechSynthesisUtterance(text.replace(/(\d+)\s*%/g, '$1 por ciento'));
+        const vs = synth.getVoices(), v = vs.find(x => /^es[-_](DO|MX|US|419)/i.test(x.lang)) || vs.find(x => /^es/i.test(x.lang));
+        if (v) u.voice = v;
+        u.lang = v?.lang || 'es-ES'; u.rate = 1; u.pitch = 1.15;
+        u.onstart = () => talking(true); u.onend = u.onerror = () => talking(false);
+        synth.speak(u);
+      } catch (_) { talking(false); }
+    }
+    async function speak(text) {
+      if (!S.voice || !text) return;
+      stopVoice();
+      const my = seq;
+      if (serverVoice) {
+        try {
+          const r = await fetch(o.voice.url, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, o.voice.headers || {}), body: JSON.stringify({ text }) });
+          if (my !== seq) return;
+          if (r.ok) {
+            const url = URL.createObjectURL(await r.blob());
+            if (my !== seq) return URL.revokeObjectURL(url);
+            audio = new Audio(url);
+            audio.onplaying = () => talking(true);
+            audio.onended = audio.onerror = () => { talking(false); URL.revokeObjectURL(url); };
+            return await audio.play();
+          }
+          if (r.status === 503) { serverVoice = false; setTimeout(() => { serverVoice = true; }, 300000); }
+        } catch (_) { if (my !== seq) return; }
+      }
+      browserSpeak(text);
+    }
+    const vbtn = ov.querySelector('.yy-voice');
+    const syncVoice = () => { vbtn.setAttribute('aria-pressed', String(S.voice)); vbtn.classList.toggle('off', !S.voice); };
+    vbtn.addEventListener('click', () => { S.voice = !S.voice; store.set('yayen.voz', S.voice); if (!S.voice) stopVoice(); syncVoice(); });
+    syncVoice();
+
+    /* ---------- nube ---------- */
+    let timer = null, idle = null;
+    const later = (fn, ms) => { clearTimeout(timer); timer = setTimeout(fn, ms); };
+    const touchIdle = () => { clearTimeout(idle); idle = setTimeout(close, o.idleCloseMs); };
+    const cloud = (on, thinking = false) => { ov.classList.toggle('answer', on); ov.classList.toggle('thinking', on && thinking); };
+    const via = hermes => { ov.classList.toggle('hermes', hermes); q('via').textContent = hermes ? 'Hermes' : 'Local'; };
+    function say(r, asAnswer = true) {
+      q('t').textContent = r.title || '';
+      q('p').textContent = r.text || '';
+      S.target = r.go ?? null;
+      ov.classList.toggle('linked', S.target != null);
+      if (asAnswer) { cloud(true); speak(r.text || r.title); }
+    }
+
+    function open(hermes) {
+      S.menu = true;
+      ov.classList.add('on'); ov.setAttribute('aria-hidden', 'false');
+      q('heard').hidden = true; q('ask').hidden = true;
+      layout(); touchIdle();
+      if (hermes) return hermesMode();
+      via(false); cloud(false);
+      S.temp = 'happy'; paint(); bump('hop'); bump('flap');
+      say({ title: pick(['¿Qué necesitas?', 'Dime.', '¿En qué te ayudo?']), text: o.hermes?.url ? 'Toca una opción, o mantenme pulsado para hablar con Hermes.' : 'Toca una opción.' }, false);
+      later(() => { S.temp = null; paint(); }, 1300);
+    }
+    function close() {
+      S.menu = false; S.temp = null; S.target = null;
+      clearTimeout(timer); clearTimeout(idle); stopVoice();
+      ov.classList.remove('on', 'answer', 'thinking', 'hermes', 'linked');
+      ov.setAttribute('aria-hidden', 'true');
+      layout(); paint();
+    }
+    async function choose(id) {
+      touchIdle(); via(false); q('heard').hidden = true; q('ask').hidden = true;
+      S.temp = 'think'; paint(); cloud(true, true); say({ title: pick(['Déjame ver', 'Un segundo', 'A ver']) }, false);
+      const started = Date.now();
+      let r;
+      try { r = await o.answer(id, api); } catch (err) { r = { title: 'No pude', text: String(err.message || err), face: 'warn' }; }
+      await new Promise(ok => setTimeout(ok, Math.max(0, 900 - (Date.now() - started))));
+      if (!S.menu) return;
+      S.temp = r && r.face === 'happy' ? 'happy' : null;
+      cloud(true); say(r || { title: '', text: '' }); paint();
+      if (S.temp) { bump('hop'); later(() => { S.temp = null; paint(); }, 1400); }
+    }
+
+    /* ---------- Hermes (mantener pulsado): escribir ahora; voz cuando haya oído local ---------- */
+    function hermesMode() {
+      via(true); cloud(true); S.temp = 'listen'; paint(); bump('flap');
+      if (!o.hermes?.url) {
+        say({ title: 'Todavía no hablo con Hermes', text: 'Cuando lo conectes (docs/HERMES.md), mantenme pulsado y háblale. Por ahora, toca una opción.' });
+        return later(() => { S.temp = null; paint(); }, 1600);
+      }
+      say({ title: 'Te escucho', text: '¿Qué le digo a Hermes?' }, false);
+      q('ask').hidden = false; setTimeout(() => q('q').focus(), 50);
+    }
+    q('ask').addEventListener('submit', async e => {
+      e.preventDefault();
+      const text = q('q').value.trim();
+      if (!text) return;
+      q('q').value = ''; q('ask').hidden = true; touchIdle();
+      q('heard').hidden = false; q('heard').textContent = `«${text}»`;
+      S.temp = 'think'; paint(); cloud(true, true); say({ title: 'Hermes está pensando' }, false);
+      let r;
+      try {
+        const res = await fetch(o.hermes.url, { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, o.hermes.headers || {}), body: JSON.stringify({ text }) });
+        const data = await res.json().catch(() => ({}));
+        r = res.ok ? { title: '', text: data.reply || 'Hermes no dijo nada.' } : { title: 'Hermes no respondió', text: data.error || `Error ${res.status}`, face: 'warn' };
+      } catch (err) { r = { title: 'Hermes no respondió', text: 'No pude llegar al servidor.', face: 'warn' }; }
+      if (!S.menu) return;
+      S.temp = null; cloud(true); say(r); paint();
     });
-    el.addEventListener('pointerup', () => clearTimeout(timer));
-    el.addEventListener('pointercancel', () => clearTimeout(timer));
-    el.addEventListener('click', e => { e.stopPropagation(); if (!long) onTap(); });
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); } });
+
+    /* ---------- gestos: toque abre/cierra, mantener = Hermes ---------- */
+    function press(target, onTap, onHold) {
+      let t = null, long = false;
+      target.addEventListener('pointerdown', e => { long = false; try { target.setPointerCapture(e.pointerId); } catch (_) {} t = setTimeout(() => { long = true; onHold(); }, o.holdMs); });
+      target.addEventListener('pointerup', () => clearTimeout(t));
+      target.addEventListener('pointercancel', () => clearTimeout(t));
+      target.addEventListener('click', e => { e.stopPropagation(); if (!long) onTap(); });
+      target.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); } });
+      target.addEventListener('contextmenu', e => e.preventDefault());
+    }
+    press(heroYy, () => open(false), () => open(true));
+    press(big, close, () => { touchIdle(); hermesMode(); });
+    ov.addEventListener('click', e => { if (e.target === ov || e.target === stage) close(); });
+    ov.querySelector('.yy-opts').addEventListener('click', e => { const b = e.target.closest('[data-opt]'); if (b) choose(b.dataset.opt); });
+    ov.querySelector('.yy-cloud').addEventListener('click', e => {
+      if (e.target.closest('.yy-ask')) return;
+      const go = S.target; close(); if (go != null && o.onNavigate) o.onNavigate(go);
+    });
+    el.querySelector('.yy-say').addEventListener('click', () => { if (S.heroTarget != null && o.onNavigate) o.onNavigate(S.heroTarget); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.menu) close(); });
+
+    const api = {
+      update: paint,
+      open: () => open(false), close, speak, say: r => { if (!S.menu) open(false); say(r); },
+      destroy() { clearInterval(rotate); close(); ov.remove(); el.innerHTML = ''; },
+    };
+    layout(); paint();
+    return api;
   }
 
-  /* ---------- en la tarjeta de Inicio ---------- */
-  let hero = null;
-  function paint() {
-    const d = Dash.data;
-    const m = d ? mood(d) : { face: 'think', badge: ['night', '…'], o: { level: 'ok', list: [] } };
-    document.querySelectorAll('.yy').forEach(y => { y.dataset.face = m.face; });
-    if (!hero) return;
-    const badge = hero.querySelector('.yy-badge');
-    badge.className = `yy-badge ${m.badge[0]}`; badge.textContent = m.badge[1];
-    const [t, p] = d ? heroText(d, m) : ['Conectando…', 'Esperando datos del panel.'];
-    hero.querySelector('[data-k="yt"]').textContent = t;
-    hero.querySelector('[data-k="yp"]').textContent = p;
-    hero.classList.toggle('night', !!m.sleeping);
-  }
-
-  Dash.yayen = {
-    /* Pinta a Yayen dentro de `el` (la tarjeta de estado del Inicio). */
-    mount(el) {
-      hero = el;
-      el.innerHTML = `<div class="yy-hero">
-        <div class="yy-wrap"><div class="yy" role="button" tabindex="0" aria-label="Yayen: toca para ver opciones, mantén pulsado para hablar con Hermes">${svg('a')}</div><span class="yy-badge ok">✓</span></div>
-        <button class="yy-say" type="button" data-hero><span class="yy-who">Yayen</span><span class="yy-bub"><b data-k="yt">Conectando…</b><span data-k="yp">Esperando datos del panel.</span></span></button>
-      </div>`;
-      press(el.querySelector('.yy'), () => open(false), () => open(true));
-      setInterval(() => { if (Dash.data && !S.menu && Dash.overall(Dash.data).level === 'ok') { S.line++; paint(); } }, 9000);
-      Dash.on('settings', paint);
-      Dash.on('navigate', () => { if (S.menu) close(); });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.menu) close(); });
-      paint();
-    },
-    render() { paint(); },
-    open, close,
-  };
-})();
+  root.Yayen = { mount, icons: ICONS, svg: n => svg(`x${++instances}${n || ''}`) };
+})(window);

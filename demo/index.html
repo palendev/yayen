@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yayen · demo</title>
+<link rel="stylesheet" href="../src/yayen.css">
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;min-height:100vh;background:#050507;color:#f5f5f7;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+  .demo{width:min(100%,560px);display:grid;gap:16px}
+  .card{background:#111113;border:1px solid #26262c;border-radius:18px;padding:20px 22px;background-image:radial-gradient(ellipse 90% 70% at 0% 0%,#2a1450 0,transparent 70%)}
+  h1{margin:0;font-size:22px}
+  p.note{margin:0;color:#a1a1a6;font-size:14px}
+  .ctl{display:flex;flex-wrap:wrap;gap:8px}
+  .ctl button{height:40px;padding:0 14px;border-radius:11px;border:1px solid #34343c;background:#16161a;color:#d6d6dc;font:500 14px inherit;cursor:pointer}
+  .ctl button[aria-pressed="true"]{background:#8a2be2;border-color:#a35cf0;color:#fff}
+</style>
+</head>
+<body>
+<main class="demo">
+  <h1>Yayen</h1>
+  <p class="note">Toca a Yayen para ver sus opciones (otro toque las cierra). Mantenlo pulsado para hablar con Hermes. Cambia el estado abajo.</p>
+  <section class="card"><div id="yayen"></div></section>
+  <div class="ctl" id="estados">
+    <button type="button" data-level="ok" aria-pressed="true">Todo bien</button>
+    <button type="button" data-level="warn" aria-pressed="false">Aviso</button>
+    <button type="button" data-level="error" aria-pressed="false">Fallo</button>
+    <button type="button" data-level="sleep" aria-pressed="false">De noche</button>
+  </div>
+</main>
+<script src="../src/yayen.js"></script>
+<script>
+  // Datos de ejemplo. En tu app, status() y answer() leen tus datos reales.
+  let level = 'ok';
+  const servidor = location.protocol.startsWith('http');   // con server/yayen_server.py hay voz propia y Hermes
+  const yy = Yayen.mount(document.getElementById('yayen'), {
+    status: () => ({
+      ok: { level: 'ok', title: 'Todo en orden', text: ['Buenos días. Todo tranquilo por aquí.', 'Las 14 páginas están arriba. Todo en orden.', 'El canal ya va por 91 suscriptores. ¡Vamos bien!'] },
+      warn: { level: 'warn', title: '1 aviso', text: 'Las noticias van atrasadas. Toca aquí y te llevo.', go: 'noticias' },
+      error: { level: 'error', title: 'Ojo, 1 problema', text: 'mi-web.com está caída. Toca aquí y te llevo.', go: 'paginas' },
+      sleep: { level: 'sleep', title: 'Descansando', text: 'Ya es tarde. Bajé el brillo, pero sigo pendiente.' },
+    }[level]),
+    options: [
+      { id: 'check', label: 'Revisar todo', icon: 'refresh' },
+      { id: 'news', label: '¿Qué hay de nuevo?', icon: 'bell' },
+      { id: 'srv', label: 'Servidores', icon: 'server' },
+      { id: 'rec', label: 'Grabar', icon: 'eyeOff' },
+      { id: 'blog', label: 'Noticias', icon: 'file' },
+      { id: 'redes', label: 'Redes', icon: 'users' },
+      { id: 'rest', label: 'Descansa', icon: 'moon' },
+    ],
+    answer: async id => ({
+      check: level === 'ok' ? { title: 'Listo', text: 'Listo, ya revisé todo. Todo en orden.', face: 'happy' } : { title: 'Ya revisé', text: 'Lo más importante: mi-web.com está caída. Toca la nube y te llevo.', go: 'paginas', face: 'error' },
+      news: level === 'ok' ? { title: '¡Todo bien!', text: 'Todo está bien. Todo en orden. Tienes 2 comentarios nuevos en YouTube.', face: 'happy' } : { title: 'Ojo con esto', text: 'Mira: mi-web.com está caída. Lo demás va bien. Toca la nube y te llevo.', go: 'paginas', face: 'error' },
+      srv: { title: 'Servidores', text: 'Los servidores van bien. El más cargado está al 74 % de RAM.', go: 'servidores' },
+      rec: { title: 'Modo grabación', text: 'Listo, me puse las gafas. Ya no se ve ninguna IP.' },
+      blog: { title: 'Noticias', text: 'Van al día: la última salió hace 3 horas.' },
+      redes: { title: 'Redes', text: 'En YouTube vas por 91 suscriptores y hoy te dejaron 2 comentarios.' },
+      rest: { title: 'Descansa', text: 'Me quedo descansando. Tócame cuando me necesites.' },
+    }[id]),
+    onNavigate: destino => alert(`Aquí tu app abriría: ${destino}`),
+    voice: { url: servidor ? '/api/yayen/voz' : null, headers: { 'X-Yayen': '1' } },
+    hermes: { url: servidor ? '/api/yayen/hermes' : null, headers: { 'X-Yayen': '1' } },
+  });
+  document.getElementById('estados').addEventListener('click', e => {
+    const b = e.target.closest('[data-level]'); if (!b) return;
+    level = b.dataset.level;
+    document.querySelectorAll('[data-level]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    yy.update();
+  });
+</script>
+</body>
+</html>

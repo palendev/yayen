@@ -1,7 +1,4 @@
-.env
-.env.*
-secrets.env
-config.json
-node_modules/
+server/.env
+.cache/
 __pycache__/
-*.py[cod]
+*.pyc
