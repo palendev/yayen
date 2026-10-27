@@ -86,7 +86,7 @@
   <mask id="${p}-mR" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><rect class="lidR" fill="#000"/><ellipse class="cutR" fill="#000"/></mask>
   <path id="${p}-leaf" d="M0-38C15-26 21-5 17 15C14 30 5 39 0 39C-7 35-17 23-18 4C-19-14-11-29 0-38Z"/>
   <g id="${p}-wingShape" transform="translate(30 62) rotate(-28)">
-    <use class="gl" href="#${p}-leaf" fill="#2f9bff" opacity=".8" filter="url(#${p}-blur)"/>
+    <use class="yv-brillo" href="#${p}-leaf" fill="#2f9bff" opacity=".8" filter="url(#${p}-blur)"/>
     <use href="#${p}-leaf" fill="url(#${p}-wing)" stroke="#c8f8ff" stroke-width="1.6"/>
     <g stroke="#dffaff" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" fill="none"><path d="M0-30C2-8 2 14 0 33"/><path d="M-13-8L0 2"/><path d="M-15 8L0 17"/><path d="M-11 23L0 29"/><path d="M12-12L1-3"/><path d="M14 4L1 12"/></g>
     <path d="M-6-30C-13-20-15-6-14 6" stroke="#fff" stroke-opacity=".75" stroke-width="2.6" stroke-linecap="round" fill="none"/>
@@ -106,11 +106,11 @@
   <g class="wingL"><use href="#${p}-wingShape"/></g>
   <g class="wingR"><use href="#${p}-wingShape" transform="translate(200 0) scale(-1 1)"/></g>
   <g class="body">
-    <circle class="gl" cx="100" cy="148" r="36" fill="#5a6cff" opacity=".45" filter="url(#${p}-blur)"/>
+    <circle class="yv-brillo" cx="100" cy="148" r="36" fill="#5a6cff" opacity=".45" filter="url(#${p}-blur)"/>
     <circle cx="100" cy="148" r="34" fill="#15121e"/>
     <g clip-path="url(#${p}-cbody)"><g transform="rotate(-42 100 148)">${stripes}</g>
       <g class="logo" transform="translate(100 149) scale(.084) translate(-256 -253)" fill="none" stroke-width="44">
-        <g class="gl" stroke="#a35cff" stroke-width="80" opacity=".55" filter="url(#${p}-blur)">${LOGO_P}${LOGO_C}</g>
+        <g class="yv-brillo" stroke="#a35cff" stroke-width="80" opacity=".55" filter="url(#${p}-blur)">${LOGO_P}${LOGO_C}</g>
         <g stroke="#0d0a1c" stroke-width="66">${LOGO_P.replace(/stroke-width="28"/g, 'stroke-width="50"')}${LOGO_C.replace(/stroke-width="28"/g, 'stroke-width="50"')}</g>
         <g stroke="#5a8cff">${LOGO_P}</g><g stroke="#f4f2ff">${LOGO_C}</g>
       </g>
@@ -122,7 +122,7 @@
   <g class="armL"><ellipse cx="50" cy="113" rx="16" ry="8" transform="rotate(30 50 113)" fill="url(#${p}-arm)" stroke="url(#${p}-rimV)" stroke-opacity=".8" stroke-width="1.3"/><ellipse cx="46" cy="109" rx="6" ry="2" transform="rotate(30 46 109)" fill="#fff" opacity=".3"/></g>
   <g class="armR"><ellipse cx="150" cy="113" rx="16" ry="8" transform="rotate(-30 150 113)" fill="url(#${p}-arm)" stroke="url(#${p}-rimV)" stroke-opacity=".8" stroke-width="1.3"/><ellipse cx="146" cy="109" rx="6" ry="2" transform="rotate(-30 146 109)" fill="#fff" opacity=".3"/></g>
   <g class="head">
-    <circle class="gl" cx="100" cy="66" r="57" fill="none" stroke="url(#${p}-rim)" stroke-width="4" opacity=".55" filter="url(#${p}-blur)"/>
+    <circle class="yv-brillo" cx="100" cy="66" r="57" fill="none" stroke="url(#${p}-rim)" stroke-width="4" opacity=".55" filter="url(#${p}-blur)"/>
     <circle cx="100" cy="66" r="54" fill="url(#${p}-head)"/>
     <circle cx="100" cy="66" r="54" fill="url(#${p}-headRim)"/>
     <circle cx="100" cy="66" r="53.3" fill="none" stroke="url(#${p}-rimV)" stroke-opacity=".85" stroke-width="1.5"/>
@@ -145,7 +145,7 @@
       <path class="mouth" stroke="#f2f8ff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
       <ellipse class="mouthO" fill="#f2f8ff" opacity="0"/>
       </g>
-      <g class="glasses" opacity="0"><rect class="gL" width="30" height="16" rx="6" fill="#120a20" stroke="url(#${p}-rim)" stroke-width="2.5"/><rect class="gR" width="30" height="16" rx="6" fill="#120a20" stroke="url(#${p}-rim)" stroke-width="2.5"/><path class="gB" stroke="#a35cff" stroke-width="2.5"/></g>
+      <g class="glasses" opacity="0"><rect class="gL" width="33" height="19" rx="7" fill="#0a0612" stroke="url(#${p}-rim)" stroke-width="2.5"/><rect class="gR" width="33" height="19" rx="7" fill="#0a0612" stroke="url(#${p}-rim)" stroke-width="2.5"/><path class="gB" stroke="#a35cff" stroke-width="2.5" stroke-linecap="round"/><path class="gS" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round" fill="none"/></g>
       <path d="M68 44C80 41 120 41 132 44" stroke="#fff" stroke-opacity=".12" stroke-width="2" stroke-linecap="round" fill="none"/>
     </g>
   </g>
@@ -397,12 +397,12 @@
     const svg = contenedor.querySelector('svg');
     const q = c => svg.querySelector('.' + c);
     const E = {}; ['aura', 'shadow', 'back', 'all', 'wingL', 'wingR', 'body', 'armL', 'armR', 'head', 'spec', 'visorRect', 'visorClip', 'glare', 'screenGlow', 'blushL', 'blushR',
-      'haloL', 'haloR', 'eyeL', 'eyeR', 'lidL', 'lidR', 'cutL', 'cutR', 'browL', 'browR', 'mouth', 'mouthO', 'glasses', 'gL', 'gR', 'gB', 'props', 'fx'].forEach(k => { E[k] = q(k); });
+      'haloL', 'haloR', 'eyeL', 'eyeR', 'lidL', 'lidR', 'cutL', 'cutR', 'browL', 'browR', 'mouth', 'mouthO', 'glasses', 'gL', 'gR', 'gB', 'gS', 'props', 'fx'].forEach(k => { E[k] = q(k); });
     const ligero = o.ligero === 'auto' ? ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency || 4) <= 2) : !!o.ligero;
     if (!o.logo) svg.querySelector('.logo').remove();
     // «cerca»: el personaje llena su caja; los efectos y objetos se salen por fuera (overflow visible).
     if (o.encuadre === 'cerca') { svg.setAttribute('viewBox', '4 0 192 204'); svg.style.overflow = 'visible'; }
-    if (ligero) { svg.querySelectorAll('.gl').forEach(el => el.remove()); svg.querySelectorAll('[filter]').forEach(el => el.removeAttribute('filter')); }   // los desenfoques cuestan en equipos modestos
+    if (ligero) { svg.querySelectorAll('.yv-brillo').forEach(el => el.remove()); svg.querySelectorAll('[filter]').forEach(el => el.removeAttribute('filter')); }   // los desenfoques cuestan en equipos modestos
 
     const P = {}, V = {}, T = {};
     for (const k in NEUTRO) { P[k] = NEUTRO[k]; V[k] = 0; T[k] = NEUTRO[k]; }
@@ -552,23 +552,37 @@
         const bx = cx, by = cy - h / 2 - 5 - (P.bA < 0 ? 1.5 : 0), a = P.bA * side * -1 * Math.PI / 180, dx = Math.cos(a) * 6.5, dy = Math.sin(a) * 6.5;
         set(E['brow' + sd], { d: `M${f(bx - dx)} ${f(by - dy)}L${f(bx + dx)} ${f(by + dy)}`, opacity: f(Math.max(0, P.brow)) });
       });
-      // gafas
+      // gafas: lentes opacos que siguen el giro de la cabeza; con ellas puestas los ojos no se ven (ni su brillo)
       E.glasses.setAttribute('opacity', f(P.glasses));
-      set(E.gL, { x: f(vx - 34 * vsx), y: f(vy - 12) }); set(E.gR, { x: f(vx + 4 * vsx), y: f(vy - 12) }); set(E.gB, { d: `M${f(vx - 4)} ${f(vy - 6)}h8` });
+      const gyx = P.yaw * 4, gyy = vy - 4 + P.pitch * 2 - 9.5, lw = 33 * vsx;
+      set(E.gL, { x: f(vx - 19.5 * vsx - lw / 2 + gyx), y: f(gyy), width: f(lw) });
+      set(E.gR, { x: f(vx + 19.5 * vsx - lw / 2 + gyx), y: f(gyy), width: f(lw) });
+      set(E.gB, { d: `M${f(vx - 19.5 * vsx + lw / 2 + gyx - 1)} ${f(gyy + 6)}h${f(39 * vsx - lw + 2)}` });
+      set(E.gS, { d: `M${f(vx - 19.5 * vsx - lw / 2 + gyx + 6)} ${f(gyy + 5)}l5 -1.5M${f(vx + 19.5 * vsx - lw / 2 + gyx + 6)} ${f(gyy + 5)}l5 -1.5` });
+      const ojos = f(Math.max(0, 1 - P.glasses * 1.6));
+      ['eyeL', 'eyeR'].forEach(k => E[k].setAttribute('opacity', ojos));
+      ['haloL', 'haloR'].forEach(k => E[k].setAttribute('opacity', f(.18 * Math.max(0, 1 - P.glasses * 1.6))));
       // boca
       const mx = vx + P.yaw * 4 + P.gx * 2, my = vy + 15 + P.pitch * 1.5, mw = 7 - P.open * 2.5;
       set(E.mouth, { d: `M${f(mx - mw)} ${f(my)}Q${f(mx)} ${f(my + P.smile * 8)} ${f(mx + mw)} ${f(my)}`, opacity: f(Math.max(0, 1 - P.open * 1.6)) });
       set(E.mouthO, { cx: f(mx), cy: f(my + 1), rx: f(3 + P.open * 2.5), ry: f(Math.max(0, P.open * 6)), opacity: f(Math.min(1, P.open * 2)) });
     }
 
-    let last = performance.now(), raf = 0, vivo = true;
+    // En modo ligero dibuja a 12 fps; activo(false) suspende el bucle cuando el personaje no está a la vista.
+    let last = performance.now(), raf = 0, timer = 0, vivo = true, activo = true;
+    function programar() {
+      if (!vivo || !activo) return;
+      if (ligero) timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(frame); }, 1000 / 12);
+      else raf = requestAnimationFrame(frame);
+    }
     function frame(now) {
-      if (!vivo) return;
+      raf = 0;
+      if (!vivo || !activo) return;
       const dt = Math.min(.05, (now - last) / 1000); last = now;
       paso(dt, now); dibujar(now);
-      raf = requestAnimationFrame(frame);
+      programar();
     }
-    raf = requestAnimationFrame(frame);
+    programar();
 
     /* ---------- secuencias ---------- */
     function correr(pasos) {
@@ -629,9 +643,15 @@
       hablar: on => { hablar = !!on; return api; },
       mirar: (x, y) => { mira = { x, y }; ultimoMov = performance.now(); return api; },
       opcion: (k, v) => { o[k] = v; return api; },
+      activo: on => {
+        activo = !!on;
+        if (activo && !raf && !timer) { last = performance.now(); programar(); }
+        if (!activo) { if (raf) cancelAnimationFrame(raf); if (timer) clearTimeout(timer); raf = 0; timer = 0; }
+        return api;
+      },
       get estado() { return { gesto, accion }; },
       svg: () => svg,
-      destruir() { vivo = false; cancelAnimationFrame(raf); removeEventListener('pointermove', onMove); contenedor.innerHTML = ''; },
+      destruir() { vivo = false; cancelAnimationFrame(raf); clearTimeout(timer); removeEventListener('pointermove', onMove); contenedor.innerHTML = ''; },
     };
     objetivo();
     return api;

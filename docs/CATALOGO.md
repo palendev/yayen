@@ -66,6 +66,7 @@ cero; no copia nada de ese proyecto, que tiene otra licencia (AGPL).
 | `mirar(x, y)` | Mira hacia un punto (−1…1) |
 | `estado` | `{ gesto, accion }` actuales |
 | `svg()` | El `<svg>` vivo (para exportar o capturar) |
+| `activo(true/false)` | Pausa o reanuda la animación (p. ej. cuando su pestaña no se ve). En modo ligero dibuja a 12 fps |
 | `destruir()` | Para la animación y limpia el contenedor |
 
 `YayenVivo.catalogo()` devuelve la lista completa, así que una app puede pintar sus propios botones (como hace
