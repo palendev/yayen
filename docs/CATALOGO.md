@@ -31,8 +31,10 @@ Pruébalo en `demo/vivo.html`, que tiene un botón por cada gesto, acción, efec
   lado contrario.
 - **Vida propia** (`vida: true`). Respira, parpadea a ratos (a veces dos veces seguidas), mira a los lados cuando está
   tranquilo y balancea las hojas. Con `majestuoso: true` todo va más lento y amplio, con un aura que late.
-- **Modo ligero** (`ligero: 'auto'`). En equipos con 2 núcleos o 2 GB o menos (como un thin client) baja la cantidad de
-  partículas y quita el aura animada.
+- **Acabado realista.** Cabeza de cristal negro con luz de borde azul y morada, hojas de vidrio que brillan, ojos y
+  boca luminosos, el logo de palen.dev en el cuerpo, un aro holográfico en el suelo y motas de luz flotando alrededor.
+- **Modo ligero** (`ligero: 'auto'`). En equipos con 2 núcleos o 2 GB o menos (como un thin client) quita los
+  desenfoques y las motas, baja la cantidad de partículas y deja el aura quieta.
 - **Toque.** Un toque lo hace saltar contento; si está dormido, lo despierta. Si lo mantienes pulsado, se queda
   escuchando.
 
@@ -48,6 +50,7 @@ cero; no copia nada de ese proyecto, que tiene otra licencia (AGPL).
 | `majestuoso` | `true` | Movimiento más lento y amplio, con aura y respiración |
 | `ligero` | `'auto'` | `true` o `false` para forzar el modo ligero |
 | `interactivo` | `true` | Responde al toque (saltar o despertar) y a mantener pulsado (escuchar) |
+| `logo` | `true` | El logo de palen.dev en el centro del cuerpo. `false` lo quita |
 
 ## API
 

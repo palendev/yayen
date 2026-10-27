@@ -21,8 +21,10 @@ curioso, escéptico, idea, piensa, tímido, preocupado, triste, enfadado (humo),
   90 × 40 cm a 300 ppp son unos 10 630 × 4724 px).
 - **Colores.** Están en RGB de pantalla. Los cian y morados muy saturados pierden algo de brillo en CMYK; pide una
   prueba de color si el tono importa.
-- **Transparencias.** El aura y la sombra del suelo son degradados semitransparentes. En fondos oscuros quedan bien; en
-  fondo blanco o en serigrafía puedes quitarlos: en el SVG son los elementos con `class="aura"` y `class="shadow"`.
+- **Transparencias y brillos.** El aura, los brillos, el aro del suelo y la sombra son degradados y desenfoques
+  semitransparentes. Lucen en fondos oscuros (como un mousepad negro); en fondo blanco o en serigrafía puedes quitarlos:
+  en el SVG son los elementos con `class="aura"`, `class="gl"`, `class="floor"` y `class="shadow"`.
+- **Logo.** El cuerpo lleva el logo de palen.dev (`class="logo"`), dibujado en vectorial.
 - **Texto.** Las poses con texto («ja», «hmm…», «COMPILANDO», «REC») usan la fuente Geist (o la que haya). Para
   imprenta, convierte el texto a trazados (Inkscape: *Trayecto → Objeto a trayecto*).
 - **Tamaño mínimo.** Por debajo de ~2 cm de alto los ojos y las rayas del cuerpo se empastan; para iconos pequeños
@@ -36,7 +38,8 @@ curioso, escéptico, idea, piensa, tímido, preocupado, triste, enfadado (humo),
 | Hojas | `#c8f6ff` → `#5fd0ff` → `#1f62ff` |
 | Rayas del cuerpo | cian `#9af0ff` → `#1f8cff`, morado `#cfa6ff` → `#7a3df0` |
 | Borde de la cabeza | `#2fb6ff` → `#a35cff` |
-| Ojos y boca | `#ffffff` |
+| Ojos y boca | `#f2f8ff` con brillo azul |
+| Logo palen.dev | azul `#5a8cff` y blanco `#f4f2ff`, contorno `#0d0a1c` |
 | Aura | `#8a2be2` → `#2f7bff` |
 
 ## Volver a generarlos

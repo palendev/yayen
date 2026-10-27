@@ -34,6 +34,8 @@ con la biblioteca estándar.
 <p align="center"><img src="docs/img/yayen-vivo.webp" width="320" alt="Yayen se despierta, se ríe, echa humo, trabaja, compila y lee"></p>
 
 `src/yayen-vivo.js` le da **vida propia**: respira, parpadea, mira alrededor, sigue tu dedo y cambia según lo que pasa.
+Tiene acabado realista (cristal negro con luz de borde, hojas de vidrio que brillan, ojos luminosos, aro holográfico)
+y lleva el **logo de palen.dev** en el cuerpo (`logo: false` lo quita).
 
 - **24 gestos**: contento, risa (con «ja ja ja»), majestuoso, escéptico («hmm…»), enfadado (echa humito), furioso,
   sorpresa, idea (bombilla), enamorado, triste, mareado, dormido (zzz)…

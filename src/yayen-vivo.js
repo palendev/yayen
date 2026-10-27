@@ -54,66 +54,99 @@
   /* ======================================================================================
      2. Dibujo base (SVG 200×200; el lienzo deja sitio arriba para los efectos)
      ====================================================================================== */
+  // Logo de palen.dev (la «P» de circuito), en coordenadas 503 × 503
+  const LOGO_P = '<path d="M160 88H313A114 114 0 0 1 313 316H252A45 45 0 0 0 207 361V470"/><circle cx="118" cy="88" r="38" stroke-width="28"/>';
+  const LOGO_C = '<path d="M265 207H184A78 78 0 0 0 106 285V380"/><circle cx="308" cy="207" r="38" stroke-width="28"/><circle cx="107" cy="420" r="38" stroke-width="28"/>';
   function baseSVG(p) {
     let stripes = '';
     for (let k = -4; k <= 4; k++) stripes += `<rect x="${100 + k * 18 - 5.5}" y="90" width="11" height="120" fill="url(#${p}-${k % 2 ? 'cy' : 'pu'})"/>`;
     return `<svg viewBox="-45 -55 290 260" class="yv" role="img" aria-label="Yayen" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="${p}-aura" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#8a2be2" stop-opacity=".55"/><stop offset=".55" stop-color="#2f7bff" stop-opacity=".18"/><stop offset="1" stop-color="#2f7bff" stop-opacity="0"/></radialGradient>
-  <radialGradient id="${p}-head" cx="34%" cy="26%" r="80%"><stop offset="0" stop-color="#4c4566"/><stop offset=".42" stop-color="#1c1928"/><stop offset="1" stop-color="#08070c"/></radialGradient>
-  <radialGradient id="${p}-spec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <filter id="${p}-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 .35  0 0 0 0 .72  0 0 0 0 1  0 0 0 1.4 0" result="c"/><feMerge><feMergeNode in="c"/><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="${p}-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="${p}-blur2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.6"/></filter>
+  <radialGradient id="${p}-aura" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#8a2be2" stop-opacity=".5"/><stop offset=".55" stop-color="#2f7bff" stop-opacity=".16"/><stop offset="1" stop-color="#2f7bff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="${p}-head" cx="38%" cy="28%" r="78%"><stop offset="0" stop-color="#3a3550"/><stop offset=".35" stop-color="#16131f"/><stop offset=".8" stop-color="#07060b"/><stop offset="1" stop-color="#020205"/></radialGradient>
+  <radialGradient id="${p}-headRim" cx="50%" cy="50%" r="50%"><stop offset=".8" stop-color="#4b6bff" stop-opacity="0"/><stop offset=".95" stop-color="#5a6cff" stop-opacity=".35"/><stop offset="1" stop-color="#9a6bff" stop-opacity=".75"/></radialGradient>
+  <radialGradient id="${p}-spec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".45" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
   <linearGradient id="${p}-rim" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2fb6ff"/><stop offset="1" stop-color="#a35cff"/></linearGradient>
-  <linearGradient id="${p}-visor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f0d1c"/><stop offset=".7" stop-color="#030308"/><stop offset="1" stop-color="#0a1230"/></linearGradient>
-  <linearGradient id="${p}-wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8f6ff"/><stop offset=".35" stop-color="#5fd0ff"/><stop offset="1" stop-color="#1f62ff"/></linearGradient>
-  <linearGradient id="${p}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d3854"/><stop offset="1" stop-color="#121019"/></linearGradient>
-  <linearGradient id="${p}-pu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfa6ff"/><stop offset="1" stop-color="#7a3df0"/></linearGradient>
-  <linearGradient id="${p}-cy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9af0ff"/><stop offset="1" stop-color="#1f8cff"/></linearGradient>
-  <radialGradient id="${p}-ball" cx="34%" cy="28%" r="78%"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".32" stop-color="#fff" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity=".65"/></radialGradient>
+  <linearGradient id="${p}-rimV" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fd8ff"/><stop offset=".5" stop-color="#5a6cff"/><stop offset="1" stop-color="#b07aff"/></linearGradient>
+  <linearGradient id="${p}-visor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#121022"/><stop offset=".6" stop-color="#020206"/><stop offset="1" stop-color="#0b1844"/></linearGradient>
+  <linearGradient id="${p}-wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9eecff" stop-opacity=".92"/><stop offset=".45" stop-color="#38b6ff" stop-opacity=".82"/><stop offset="1" stop-color="#2456ff" stop-opacity=".78"/></linearGradient>
+  <linearGradient id="${p}-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34304a"/><stop offset=".5" stop-color="#0d0b14"/><stop offset="1" stop-color="#050408"/></linearGradient>
+  <linearGradient id="${p}-pu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8b4ff"/><stop offset="1" stop-color="#8243f5"/></linearGradient>
+  <linearGradient id="${p}-cy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6f4ff"/><stop offset="1" stop-color="#2a9bff"/></linearGradient>
+  <radialGradient id="${p}-ball" cx="36%" cy="28%" r="78%"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".72"/></radialGradient>
+  <radialGradient id="${p}-floor" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#5a6cff" stop-opacity=".35"/><stop offset=".7" stop-color="#3a3cff" stop-opacity=".08"/><stop offset="1" stop-color="#3a3cff" stop-opacity="0"/></radialGradient>
   <linearGradient id="${p}-holo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#a35cff" stop-opacity=".12"/></linearGradient>
   <clipPath id="${p}-cbody"><circle cx="100" cy="148" r="33"/></clipPath>
+  <clipPath id="${p}-chead"><circle cx="100" cy="66" r="54"/></clipPath>
   <clipPath id="${p}-cvisor"><rect class="visorClip" x="60" y="40" width="80" height="52" rx="22"/></clipPath>
   <mask id="${p}-mL" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><rect class="lidL" fill="#000"/><ellipse class="cutL" fill="#000"/></mask>
   <mask id="${p}-mR" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><rect class="lidR" fill="#000"/><ellipse class="cutR" fill="#000"/></mask>
+  <path id="${p}-leaf" d="M0-38C15-26 21-5 17 15C14 30 5 39 0 39C-7 35-17 23-18 4C-19-14-11-29 0-38Z"/>
   <g id="${p}-wingShape" transform="translate(30 62) rotate(-28)">
-    <path d="M0-38C15-26 21-5 17 15C14 30 5 39 0 39C-7 35-17 23-18 4C-19-14-11-29 0-38Z" fill="url(#${p}-wing)" stroke="#bff3ff" stroke-opacity=".7" stroke-width="1.4"/>
-    <g stroke="#e6fbff" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M0-30C2-8 2 14 0 33"/><path d="M-13-8L0 2"/><path d="M-15 8L0 17"/><path d="M-11 23L0 29"/><path d="M12-12L1-3"/><path d="M14 4L1 12"/></g>
-    <path d="M-6-30C-13-20-15-6-14 6" stroke="#fff" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <use class="gl" href="#${p}-leaf" fill="#2f9bff" opacity=".8" filter="url(#${p}-blur)"/>
+    <use href="#${p}-leaf" fill="url(#${p}-wing)" stroke="#c8f8ff" stroke-width="1.6"/>
+    <g stroke="#dffaff" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" fill="none"><path d="M0-30C2-8 2 14 0 33"/><path d="M-13-8L0 2"/><path d="M-15 8L0 17"/><path d="M-11 23L0 29"/><path d="M12-12L1-3"/><path d="M14 4L1 12"/></g>
+    <path d="M-6-30C-13-20-15-6-14 6" stroke="#fff" stroke-opacity=".75" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    <path d="M9-22C14-12 15 0 13 10" stroke="#fff" stroke-opacity=".3" stroke-width="1.6" stroke-linecap="round" fill="none"/>
   </g>
 </defs>
 <circle class="aura" cx="100" cy="100" r="104" fill="url(#${p}-aura)"/>
+<g class="floor">
+  <ellipse cx="100" cy="189" rx="62" ry="10" fill="url(#${p}-floor)"/>
+  <ellipse cx="100" cy="189" rx="56" ry="8" fill="none" stroke="#6a8cff" stroke-width="2.4" opacity=".7" filter="url(#${p}-blur2)"/>
+  <ellipse cx="100" cy="189" rx="56" ry="8" fill="none" stroke="#bfe4ff" stroke-width=".9" opacity=".9"/>
+  <ellipse cx="100" cy="189" rx="40" ry="5.5" fill="none" stroke="#8a6bff" stroke-width=".7" opacity=".45"/>
+</g>
 <ellipse class="shadow" cx="100" cy="190" rx="44" ry="6" fill="#000" opacity=".5"/>
 <g class="back"></g>
 <g class="all">
   <g class="wingL"><use href="#${p}-wingShape"/></g>
   <g class="wingR"><use href="#${p}-wingShape" transform="translate(200 0) scale(-1 1)"/></g>
   <g class="body">
+    <circle class="gl" cx="100" cy="148" r="36" fill="#5a6cff" opacity=".45" filter="url(#${p}-blur)"/>
     <circle cx="100" cy="148" r="34" fill="#15121e"/>
-    <g clip-path="url(#${p}-cbody)"><g transform="rotate(-42 100 148)">${stripes}</g><circle cx="100" cy="148" r="33" fill="url(#${p}-ball)"/></g>
-    <circle cx="100" cy="148" r="33.5" fill="none" stroke="#2c2840" stroke-width="1.5"/>
-    <ellipse cx="86" cy="130" rx="9" ry="4.5" transform="rotate(-35 86 130)" fill="#fff" opacity=".35"/>
+    <g clip-path="url(#${p}-cbody)"><g transform="rotate(-42 100 148)">${stripes}</g>
+      <g class="logo" transform="translate(100 149) scale(.084) translate(-256 -253)" fill="none" stroke-width="44">
+        <g class="gl" stroke="#a35cff" stroke-width="80" opacity=".55" filter="url(#${p}-blur)">${LOGO_P}${LOGO_C}</g>
+        <g stroke="#0d0a1c" stroke-width="66">${LOGO_P.replace(/stroke-width="28"/g, 'stroke-width="50"')}${LOGO_C.replace(/stroke-width="28"/g, 'stroke-width="50"')}</g>
+        <g stroke="#5a8cff">${LOGO_P}</g><g stroke="#f4f2ff">${LOGO_C}</g>
+      </g>
+      <circle cx="100" cy="148" r="33" fill="url(#${p}-ball)"/></g>
+    <circle cx="100" cy="148" r="33.5" fill="none" stroke="url(#${p}-rimV)" stroke-opacity=".7" stroke-width="1.3"/>
+    <ellipse cx="86" cy="130" rx="10" ry="4.5" transform="rotate(-35 86 130)" fill="#fff" opacity=".45"/>
+    <ellipse cx="83" cy="128.5" rx="3.5" ry="1.6" transform="rotate(-35 83 128.5)" fill="#fff" opacity=".8"/>
   </g>
-  <g class="armL"><ellipse cx="50" cy="113" rx="16" ry="8" transform="rotate(30 50 113)" fill="url(#${p}-arm)" stroke="#6a5f92" stroke-width="1.4"/></g>
-  <g class="armR"><ellipse cx="150" cy="113" rx="16" ry="8" transform="rotate(-30 150 113)" fill="url(#${p}-arm)" stroke="#6a5f92" stroke-width="1.4"/></g>
+  <g class="armL"><ellipse cx="50" cy="113" rx="16" ry="8" transform="rotate(30 50 113)" fill="url(#${p}-arm)" stroke="url(#${p}-rimV)" stroke-opacity=".8" stroke-width="1.3"/><ellipse cx="46" cy="109" rx="6" ry="2" transform="rotate(30 46 109)" fill="#fff" opacity=".3"/></g>
+  <g class="armR"><ellipse cx="150" cy="113" rx="16" ry="8" transform="rotate(-30 150 113)" fill="url(#${p}-arm)" stroke="url(#${p}-rimV)" stroke-opacity=".8" stroke-width="1.3"/><ellipse cx="146" cy="109" rx="6" ry="2" transform="rotate(-30 146 109)" fill="#fff" opacity=".3"/></g>
   <g class="head">
+    <circle class="gl" cx="100" cy="66" r="57" fill="none" stroke="url(#${p}-rim)" stroke-width="4" opacity=".55" filter="url(#${p}-blur)"/>
     <circle cx="100" cy="66" r="54" fill="url(#${p}-head)"/>
-    <circle cx="100" cy="66" r="53.2" fill="none" stroke="url(#${p}-rim)" stroke-opacity=".5" stroke-width="1.6"/>
-    <ellipse class="spec" cx="74" cy="28" rx="20" ry="9" transform="rotate(-28 74 28)" fill="url(#${p}-spec)"/>
-    <rect class="visorRect" x="60" y="40" width="80" height="52" rx="22" fill="url(#${p}-visor)" stroke="#2e2848" stroke-width="1.6"/>
+    <circle cx="100" cy="66" r="54" fill="url(#${p}-headRim)"/>
+    <circle cx="100" cy="66" r="53.3" fill="none" stroke="url(#${p}-rimV)" stroke-opacity=".85" stroke-width="1.5"/>
+    <g clip-path="url(#${p}-chead)"><path d="M140 40C150 58 150 80 138 100" stroke="#bfe4ff" stroke-opacity=".35" stroke-width="3" stroke-linecap="round" fill="none" filter="url(#${p}-blur2)"/></g>
+    <ellipse class="spec" cx="76" cy="27" rx="22" ry="10" transform="rotate(-28 76 27)" fill="url(#${p}-spec)"/>
+    <rect class="visorRect" x="60" y="40" width="80" height="52" rx="22" fill="url(#${p}-visor)" stroke="#3a3560" stroke-width="1.6"/>
     <g clip-path="url(#${p}-cvisor)">
-      <path class="glare" d="M70 92L96 40H108L82 92Z" fill="#fff" opacity=".05"/>
-      <rect x="40" y="84" width="120" height="8" fill="#2f7bff" opacity=".12"/>
+      <path class="glare" d="M70 92L96 40H110L84 92ZM88 92L114 40H118L92 92Z" fill="#fff" opacity=".07"/>
+      <rect x="40" y="84" width="120" height="8" fill="#2f7bff" opacity=".18"/>
       <rect class="screenGlow" x="40" y="40" width="120" height="52" fill="#5fd0ff" opacity="0"/>
       <ellipse class="blushL" cx="72" cy="78" rx="7" ry="3.5" fill="#ff7ac8" opacity="0"/>
       <ellipse class="blushR" cx="128" cy="78" rx="7" ry="3.5" fill="#ff7ac8" opacity="0"/>
       <rect class="haloL" fill="#8ee8ff" opacity=".18" mask="url(#${p}-mL)"/>
       <rect class="haloR" fill="#8ee8ff" opacity=".18" mask="url(#${p}-mR)"/>
-      <rect class="eyeL" fill="#f5f5f7" mask="url(#${p}-mL)"/>
-      <rect class="eyeR" fill="#f5f5f7" mask="url(#${p}-mR)"/>
-      <path class="browL" stroke="#f5f5f7" stroke-width="4" stroke-linecap="round" fill="none" opacity="0"/>
-      <path class="browR" stroke="#f5f5f7" stroke-width="4" stroke-linecap="round" fill="none" opacity="0"/>
-      <path class="mouth" stroke="#f5f5f7" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-      <ellipse class="mouthO" fill="#f5f5f7" opacity="0"/>
+      <g filter="url(#${p}-glow)">
+      <rect class="eyeL" fill="#f2f8ff" mask="url(#${p}-mL)"/>
+      <rect class="eyeR" fill="#f2f8ff" mask="url(#${p}-mR)"/>
+      <path class="browL" stroke="#f2f8ff" stroke-width="4" stroke-linecap="round" fill="none" opacity="0"/>
+      <path class="browR" stroke="#f2f8ff" stroke-width="4" stroke-linecap="round" fill="none" opacity="0"/>
+      <path class="mouth" stroke="#f2f8ff" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      <ellipse class="mouthO" fill="#f2f8ff" opacity="0"/>
+      </g>
       <g class="glasses" opacity="0"><rect class="gL" width="30" height="16" rx="6" fill="#120a20" stroke="url(#${p}-rim)" stroke-width="2.5"/><rect class="gR" width="30" height="16" rx="6" fill="#120a20" stroke="url(#${p}-rim)" stroke-width="2.5"/><path class="gB" stroke="#a35cff" stroke-width="2.5"/></g>
+      <path d="M68 44C80 41 120 41 132 44" stroke="#fff" stroke-opacity=".12" stroke-width="2" stroke-linecap="round" fill="none"/>
     </g>
   </g>
   <g class="props"></g>
@@ -189,6 +222,9 @@
       const r = mk('rect', { width: 4, height: 7, rx: 1, fill: pick(['#5fd0ff', '#a35cff', '#ffe07a', '#ff7ac8', '#7cf0b0']) }, c.fx);
       const x0 = rnd(0, 200), vx = rnd(-20, 20), spin = rnd(-400, 400);
       return { el: r, vida: 1800, mover(el, k) { set(el, { transform: `translate(${f(x0 + vx * k)} ${f(-50 + k * 250)}) rotate(${f(spin * k)})`, opacity: f(1 - k * k) }); } }; } },
+    motas: { nombre: 'Motas de luz (ambiente)', cada: 420, crear(c) {
+      const x = rnd(-30, 230), y0 = rnd(60, 200), r = rnd(.8, 2.4), s = mk('circle', { r, cx: x, fill: pick(['#5fb8ff', '#8a6bff', '#bfe4ff']) }, c.back);
+      return { el: s, vida: rnd(4000, 7000), mover(el, k) { set(el, { cy: f(y0 - k * 50), cx: f(x + Math.sin(k * 5) * 4), opacity: f(Math.sin(k * Math.PI) * .7) }); } }; } },
     notas: { nombre: 'Notas musicales', cada: 600, crear(c) {
       const t = mk('text', { 'font-family': 'serif', 'font-size': 18, fill: pick(['#8ee8ff', '#e2c8ff']) }, c.fx); t.textContent = pick(['♪', '♫']);
       const side = pick([-1, 1]);
@@ -355,7 +391,7 @@
      ====================================================================================== */
   let instancias = 0;
   function crear(contenedor, opciones = {}) {
-    const o = Object.assign({ seguir: true, vida: true, ligero: 'auto', majestuoso: true }, opciones);
+    const o = Object.assign({ seguir: true, vida: true, ligero: 'auto', majestuoso: true, logo: true }, opciones);
     const p = `yv${++instancias}`;
     contenedor.innerHTML = baseSVG(p);
     const svg = contenedor.querySelector('svg');
@@ -363,6 +399,8 @@
     const E = {}; ['aura', 'shadow', 'back', 'all', 'wingL', 'wingR', 'body', 'armL', 'armR', 'head', 'spec', 'visorRect', 'visorClip', 'glare', 'screenGlow', 'blushL', 'blushR',
       'haloL', 'haloR', 'eyeL', 'eyeR', 'lidL', 'lidR', 'cutL', 'cutR', 'browL', 'browR', 'mouth', 'mouthO', 'glasses', 'gL', 'gR', 'gB', 'props', 'fx'].forEach(k => { E[k] = q(k); });
     const ligero = o.ligero === 'auto' ? ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency || 4) <= 2) : !!o.ligero;
+    if (!o.logo) svg.querySelector('.logo').remove();
+    if (ligero) { svg.querySelectorAll('.gl').forEach(el => el.remove()); svg.querySelectorAll('[filter]').forEach(el => el.removeAttribute('filter')); }   // los desenfoques cuestan en equipos modestos
 
     const P = {}, V = {}, T = {};
     for (const k in NEUTRO) { P[k] = NEUTRO[k]; V[k] = 0; T[k] = NEUTRO[k]; }
@@ -440,7 +478,7 @@
       }
       hopV += (-hop * 240 - hopV * 14) * dt; hop += hopV * dt;
       // efectos: bucles del gesto/acción + sueltos
-      const activos = new Set(bucles);
+      const activos = new Set(bucles); if (o.majestuoso && !ligero) activos.add('motas');
       sueltos = sueltos.filter(s => s.hasta > now); sueltos.forEach(s => activos.add(s.id));
       const cap = ligero ? 10 : 40;
       activos.forEach(id => {
