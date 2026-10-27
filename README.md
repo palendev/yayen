@@ -29,6 +29,35 @@ con la biblioteca estándar.
 - **Modo ligero** automático en equipos modestos (p. ej. un thin client como pantalla): sin animaciones continuas.
 - Cabe en pantallas apaisadas muy bajas (diseñado para 1280×400) y en vertical.
 
+## Yayen vivo: gestos, acciones y efectos
+
+<p align="center"><img src="docs/img/yayen-vivo.webp" width="320" alt="Yayen se despierta, se ríe, echa humo, trabaja, compila y lee"></p>
+
+`src/yayen-vivo.js` le da **vida propia**: respira, parpadea, mira alrededor, sigue tu dedo y cambia según lo que pasa.
+
+- **24 gestos**: contento, risa (con «ja ja ja»), majestuoso, escéptico («hmm…»), enfadado (echa humito), furioso,
+  sorpresa, idea (bombilla), enamorado, triste, mareado, dormido (zzz)…
+- **14 acciones con objetos**: trabajando en su laptop, leyendo un libro, **compilando función por función** (cada
+  una gira y se vuelve ✓), analizando, buscando con lupa, desplegando un cohete, descargando, música, grabando…
+- **17 efectos** y **secuencias**: al **despertarlo** abre un ojo, bosteza, se estira, sacude la cabeza y salta contento.
+- Se amplía sin tocar el código: `YayenVivo.registrarGesto`, `registrarEfecto` y `registrarAccion`.
+
+```js
+const yy = YayenVivo.crear(document.getElementById('yayen'));
+yy.despertar().then(() => yy.accion('compilando', { items: ['server.py', 'yayen.js'] }));
+```
+
+Catálogo completo, API y cómo añadir gestos: **[docs/CATALOGO.md](docs/CATALOGO.md)** · demo: `demo/vivo.html`.
+
+<img src="docs/img/catalogo-gestos.png" alt="Gestos de Yayen">
+
+## Yayen para imprimir
+
+En [`assets/`](assets/) está Yayen en **SVG vectorial** (el principal y 28 poses) y en PNG transparente, listo para
+mousepads, stickers, camisetas o redes. Notas de impresión y colores: [assets/README.md](assets/README.md).
+
+<p align="center"><img src="assets/png/yayen-contento.png" width="200" alt="Yayen"></p>
+
 ## Empezar en 1 minuto
 
 ```sh
@@ -82,13 +111,18 @@ Así se ve en la pantalla táctil del rack (1280×400), integrado en el Inicio d
 | [docs/VOZ.md](docs/VOZ.md) | Voz «Digital» con Piper local: instalación, ajuste, dónde suena |
 | [docs/HERMES.md](docs/HERMES.md) | Darle acceso a Hermes: credenciales, `.env`, seguridad y un ejemplo real |
 | [docs/PERSONAJE.md](docs/PERSONAJE.md) | El personaje: partes, caras, animaciones y cómo personalizarlo |
+| [docs/CATALOGO.md](docs/CATALOGO.md) | Yayen vivo: todos los gestos, acciones, efectos y secuencias, y cómo añadir más |
+| [assets/README.md](assets/README.md) | Archivos para imprimir (SVG y PNG), colores y consejos de imprenta |
 
 ## Estructura
 
 ```
 src/yayen.js            el personaje, la tarjeta, la capa de opciones, la nube, la voz y los gestos
 src/yayen.css           estilos (variables --yy-* para adaptarlo a tu marca)
+src/yayen-vivo.js       Yayen vivo: gestos, acciones con objetos, efectos y secuencias (sin dependencias)
 demo/index.html         demo con datos de ejemplo
+demo/vivo.html          catálogo interactivo de Yayen vivo
+assets/                 Yayen en SVG y PNG para imprimir y para marca
 server/yayen_server.py  servidor de ejemplo: demo + /api/yayen/voz (Piper) + /api/yayen/hermes (puente)
 server/.env.example     dónde van las credenciales (copiar a server/.env)
 tools/instalar-voz.sh   instala Piper, la voz y ffmpeg

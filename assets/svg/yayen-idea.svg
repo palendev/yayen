@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Yayen · diseño de Jordan Palen · https://github.com/palendev/yayen -->
+<svg viewBox="-17.3 -43.7 234.6 293.2" role="img" aria-label="Yayen" xmlns="http://www.w3.org/2000/svg" width="2048" height="2560">
+<defs>
+  <radialGradient id="yv1-aura" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#8a2be2" stop-opacity=".55"/><stop offset=".55" stop-color="#2f7bff" stop-opacity=".18"/><stop offset="1" stop-color="#2f7bff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="yv1-head" cx="34%" cy="26%" r="80%"><stop offset="0" stop-color="#4c4566"/><stop offset=".42" stop-color="#1c1928"/><stop offset="1" stop-color="#08070c"/></radialGradient>
+  <radialGradient id="yv1-spec" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="yv1-rim" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2fb6ff"/><stop offset="1" stop-color="#a35cff"/></linearGradient>
+  <linearGradient id="yv1-visor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f0d1c"/><stop offset=".7" stop-color="#030308"/><stop offset="1" stop-color="#0a1230"/></linearGradient>
+  <linearGradient id="yv1-wing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8f6ff"/><stop offset=".35" stop-color="#5fd0ff"/><stop offset="1" stop-color="#1f62ff"/></linearGradient>
+  <linearGradient id="yv1-arm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d3854"/><stop offset="1" stop-color="#121019"/></linearGradient>
+  <linearGradient id="yv1-pu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfa6ff"/><stop offset="1" stop-color="#7a3df0"/></linearGradient>
+  <linearGradient id="yv1-cy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9af0ff"/><stop offset="1" stop-color="#1f8cff"/></linearGradient>
+  <radialGradient id="yv1-ball" cx="34%" cy="28%" r="78%"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".32" stop-color="#fff" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity=".65"/></radialGradient>
+  <linearGradient id="yv1-holo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb6ff" stop-opacity=".28"/><stop offset="1" stop-color="#a35cff" stop-opacity=".12"/></linearGradient>
+  <clipPath id="yv1-cbody"><circle cx="100" cy="148" r="33"/></clipPath>
+  <clipPath id="yv1-cvisor"><rect class="visorClip" x="60" y="40" width="80" height="52" rx="22" transform="translate(100 64.4) scale(1 1) translate(-100 -66)"/></clipPath>
+  <mask id="yv1-mL" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><rect class="lidL" fill="#000" x="70.05" y="42.46" width="20.9" height="14.47"/><ellipse class="cutL" fill="#000" cx="80.5" cy="75.14" rx="10.97" ry="10.01" opacity="0"/></mask>
+  <mask id="yv1-mR" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200"><rect width="200" height="200" fill="#fff"/><rect class="lidR" fill="#000" x="109.05" y="42.46" width="20.9" height="14.47"/><ellipse class="cutR" fill="#000" cx="119.5" cy="75.14" rx="10.97" ry="10.01" opacity="0"/></mask>
+  <g id="yv1-wingShape" transform="translate(30 62) rotate(-28)">
+    <path d="M0-38C15-26 21-5 17 15C14 30 5 39 0 39C-7 35-17 23-18 4C-19-14-11-29 0-38Z" fill="url(#yv1-wing)" stroke="#bff3ff" stroke-opacity=".7" stroke-width="1.4"/>
+    <g stroke="#e6fbff" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M0-30C2-8 2 14 0 33"/><path d="M-13-8L0 2"/><path d="M-15 8L0 17"/><path d="M-11 23L0 29"/><path d="M12-12L1-3"/><path d="M14 4L1 12"/></g>
+    <path d="M-6-30C-13-20-15-6-14 6" stroke="#fff" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+</defs>
+<circle class="aura" cx="100" cy="100" r="104" fill="url(#yv1-aura)" opacity="0.78" transform="translate(100 100) scale(1.07) translate(-100 -100)"/>
+<ellipse class="shadow" cx="100" cy="190" rx="42.11" ry="6" fill="#000" opacity="0.5"/>
+<g class="back"/>
+<g class="all" transform="translate(100 106.22) scale(1.01) rotate(0) translate(-100 -110)">
+  <g class="wingL" transform="rotate(3.45 46 74)"><use href="#yv1-wingShape"/></g>
+  <g class="wingR" transform="rotate(-3.45 154 74)"><use href="#yv1-wingShape" transform="translate(200 0) scale(-1 1)"/></g>
+  <g class="body" transform="translate(0 0) rotate(0 100 148)">
+    <circle cx="100" cy="148" r="34" fill="#15121e"/>
+    <g clip-path="url(#yv1-cbody)"><g transform="rotate(-42 100 148)"><rect x="22.5" y="90" width="11" height="120" fill="url(#yv1-pu)"/><rect x="40.5" y="90" width="11" height="120" fill="url(#yv1-cy)"/><rect x="58.5" y="90" width="11" height="120" fill="url(#yv1-pu)"/><rect x="76.5" y="90" width="11" height="120" fill="url(#yv1-cy)"/><rect x="94.5" y="90" width="11" height="120" fill="url(#yv1-pu)"/><rect x="112.5" y="90" width="11" height="120" fill="url(#yv1-cy)"/><rect x="130.5" y="90" width="11" height="120" fill="url(#yv1-pu)"/><rect x="148.5" y="90" width="11" height="120" fill="url(#yv1-cy)"/><rect x="166.5" y="90" width="11" height="120" fill="url(#yv1-pu)"/></g><circle cx="100" cy="148" r="33" fill="url(#yv1-ball)"/></g>
+    <circle cx="100" cy="148" r="33.5" fill="none" stroke="#2c2840" stroke-width="1.5"/>
+    <ellipse cx="86" cy="130" rx="9" ry="4.5" transform="rotate(-35 86 130)" fill="#fff" opacity=".35"/>
+  </g>
+  <g class="armL" transform="rotate(0 60 110)"><ellipse cx="50" cy="113" rx="16" ry="8" transform="rotate(30 50 113)" fill="url(#yv1-arm)" stroke="#6a5f92" stroke-width="1.4"/></g>
+  <g class="armR" transform="rotate(0 140 110)"><ellipse cx="150" cy="113" rx="16" ry="8" transform="rotate(-30 150 113)" fill="url(#yv1-arm)" stroke="#6a5f92" stroke-width="1.4"/></g>
+  <g class="head" transform="translate(0 -2) rotate(0 100 112)">
+    <circle cx="100" cy="66" r="54" fill="url(#yv1-head)"/>
+    <circle cx="100" cy="66" r="53.2" fill="none" stroke="url(#yv1-rim)" stroke-opacity=".5" stroke-width="1.6"/>
+    <ellipse class="spec" cx="74" cy="28" rx="20" ry="9" transform="translate(0 2) rotate(-28 74 28)" fill="url(#yv1-spec)"/>
+    <rect class="visorRect" x="60" y="40" width="80" height="52" rx="22" fill="url(#yv1-visor)" stroke="#2e2848" stroke-width="1.6" transform="translate(100 64.4) scale(1 1) translate(-100 -66)"/>
+    <g clip-path="url(#yv1-cvisor)">
+      <path class="glare" d="M70 92L96 40H108L82 92Z" fill="#fff" opacity=".05" transform="translate(0 0)"/>
+      <rect x="40" y="84" width="120" height="8" fill="#2f7bff" opacity=".12"/>
+      <rect class="screenGlow" x="40" y="40" width="120" height="52" fill="#5fd0ff" opacity="0"/>
+      <ellipse class="blushL" cx="72" cy="76.4" rx="7" ry="3.5" fill="#ff7ac8" opacity="0"/>
+      <ellipse class="blushR" cx="128" cy="76.4" rx="7" ry="3.5" fill="#ff7ac8" opacity="0"/>
+      <rect class="haloL" fill="#8ee8ff" opacity=".18" mask="url(#yv1-mL)" x="72.28" y="43.46" width="16.45" height="22.68" rx="8.23"/>
+      <rect class="haloR" fill="#8ee8ff" opacity=".18" mask="url(#yv1-mR)" x="111.28" y="43.46" width="16.45" height="22.68" rx="8.23"/>
+      <rect class="eyeL" fill="#f5f5f7" mask="url(#yv1-mL)" x="75.28" y="46.46" width="10.45" height="16.68" rx="5.23"/>
+      <rect class="eyeR" fill="#f5f5f7" mask="url(#yv1-mR)" x="114.28" y="46.46" width="10.45" height="16.68" rx="5.23"/>
+      <path class="browL" stroke="#f5f5f7" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6" d="M74.06 40.87L86.94 39.06"/>
+      <path class="browR" stroke="#f5f5f7" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6" d="M113.06 39.06L125.94 40.87"/>
+      <path class="mouth" stroke="#f5f5f7" stroke-width="4.5" stroke-linecap="round" fill="none" d="M93 78.8Q100 85.2 107 78.8" opacity="1"/>
+      <ellipse class="mouthO" fill="#f5f5f7" opacity="0" cx="100" cy="79.8" rx="3" ry="0"/>
+      <g class="glasses" opacity="0"><rect class="gL" width="30" height="16" rx="6" fill="#120a20" stroke="url(#yv1-rim)" stroke-width="2.5" x="66" y="52.4"/><rect class="gR" width="30" height="16" rx="6" fill="#120a20" stroke="url(#yv1-rim)" stroke-width="2.5" x="104" y="52.4"/><path class="gB" stroke="#a35cff" stroke-width="2.5" d="M96 58.4h8"/></g>
+    </g>
+  </g>
+  <g class="props"/>
+</g>
+<g class="fx"><g transform="translate(100 -21.73) scale(1)" opacity="1"><circle cx="0" cy="0" r="16" fill="#ffe9a8" opacity="0.25"/><path d="M0-10C-7-10-10-4-8 1C-6 5-4 6-4 10H4C4 6 6 5 8 1C10-4 7-10 0-10Z" fill="#ffe07a" stroke="#fff3c4" stroke-width="1.2"/><rect x="-4" y="11" width="8" height="4" rx="1.5" fill="#b9b2c8"/></g></g>
+</svg>

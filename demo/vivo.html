@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yayen vivo · catálogo</title>
+<style>
+  :root { --bg:#0b0710; --card:#16101f; --line:#2a2038; --text:#f3eefc; --mute:#a99bc0; --brand:#B07AFF; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.4 system-ui, sans-serif; }
+  main { max-width:1280px; margin:0 auto; padding:16px; display:grid; grid-template-columns:minmax(280px,420px) 1fr; gap:16px; }
+  @media (max-width:760px) { main { grid-template-columns:1fr; } }
+  .escena { position:sticky; top:16px; height:420px; background:radial-gradient(circle at 50% 40%, #241634, #0b0710 70%); border:1px solid var(--line); border-radius:20px; }
+  .escena > div { position:absolute; inset:0; }
+  .estado { position:absolute; left:16px; bottom:12px; color:var(--mute); font-size:13px; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--mute); margin:18px 0 8px; }
+  .grupo { display:flex; flex-wrap:wrap; gap:8px; }
+  button { min-height:48px; padding:0 14px; border-radius:24px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--brand); } button.on { background:var(--brand); color:#140a1f; border-color:var(--brand); }
+  p { color:var(--mute); margin:0; }
+</style>
+</head>
+<body>
+<main>
+  <section class="escena"><div id="yayen"></div><span class="estado" id="estado"></span></section>
+  <section>
+    <h1>Yayen vivo</h1>
+    <p>Toca a Yayen para que salte; mantenlo pulsado para que te escuche. Si está dormido, un toque lo despierta.</p>
+    <h2>Secuencias</h2><div class="grupo" id="secuencias"></div>
+    <h2>Gestos</h2><div class="grupo" id="gestos"></div>
+    <h2>Acciones</h2><div class="grupo" id="acciones"></div>
+    <h2>Efectos sueltos</h2><div class="grupo" id="efectos"></div>
+    <h2>Estados del panel</h2><div class="grupo" id="estados"></div>
+  </section>
+</main>
+<script src="../src/yayen-vivo.js"></script>
+<script>
+  const y = YayenVivo.crear(document.getElementById('yayen'));
+  window.yayen = y;
+  const cat = YayenVivo.catalogo();
+  const estado = document.getElementById('estado');
+  const pinta = () => { const e = y.estado; estado.textContent = `gesto: ${e.gesto}${e.accion ? ' · acción: ' + e.accion : ''}`; };
+  function boton(donde, texto, fn) {
+    const b = document.createElement('button'); b.textContent = texto;
+    b.onclick = () => { fn(); pinta(); };
+    document.getElementById(donde).appendChild(b);
+  }
+  cat.secuencias.forEach(s => boton('secuencias', s[0].toUpperCase() + s.slice(1), () => { y.accion(null); y[s](); }));
+  boton('secuencias', 'Hablar on/off', () => y.hablar(!(window._h = !window._h)));
+  cat.gestos.forEach(g => boton('gestos', g.nombre, () => { y.accion(null); y.gesto(g.id); }));
+  cat.acciones.forEach(a => boton('acciones', a.nombre, () => y.accion(a.id)));
+  boton('acciones', 'Ninguna', () => y.accion(null));
+  cat.efectos.forEach(e => boton('efectos', e.nombre, () => y.efecto(e.id, 2500)));
+  Object.entries(cat.estados).forEach(([k, v]) => boton('estados', k, () => { y.accion(v.accion || null); if (v.gesto) y.gesto(v.gesto); }));
+  setInterval(pinta, 500); pinta();
+</script>
+</body>
+</html>
