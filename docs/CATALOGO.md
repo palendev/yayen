@@ -51,6 +51,7 @@ cero; no copia nada de ese proyecto, que tiene otra licencia (AGPL).
 | `ligero` | `'auto'` | `true` o `false` para forzar el modo ligero |
 | `interactivo` | `true` | Responde al toque (saltar o despertar) y a mantener pulsado (escuchar) |
 | `logo` | `true` | El logo de palen.dev en el centro del cuerpo. `false` lo quita |
+| `encuadre` | `'amplio'` | `'cerca'` hace que el personaje llene su caja (los efectos se salen por fuera). Útil en tarjetas pequeñas |
 
 ## API
 

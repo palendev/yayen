@@ -391,7 +391,7 @@
      ====================================================================================== */
   let instancias = 0;
   function crear(contenedor, opciones = {}) {
-    const o = Object.assign({ seguir: true, vida: true, ligero: 'auto', majestuoso: true, logo: true }, opciones);
+    const o = Object.assign({ seguir: true, vida: true, ligero: 'auto', majestuoso: true, logo: true, encuadre: 'amplio' }, opciones);
     const p = `yv${++instancias}`;
     contenedor.innerHTML = baseSVG(p);
     const svg = contenedor.querySelector('svg');
@@ -400,6 +400,8 @@
       'haloL', 'haloR', 'eyeL', 'eyeR', 'lidL', 'lidR', 'cutL', 'cutR', 'browL', 'browR', 'mouth', 'mouthO', 'glasses', 'gL', 'gR', 'gB', 'props', 'fx'].forEach(k => { E[k] = q(k); });
     const ligero = o.ligero === 'auto' ? ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency || 4) <= 2) : !!o.ligero;
     if (!o.logo) svg.querySelector('.logo').remove();
+    // «cerca»: el personaje llena su caja; los efectos y objetos se salen por fuera (overflow visible).
+    if (o.encuadre === 'cerca') { svg.setAttribute('viewBox', '4 0 192 204'); svg.style.overflow = 'visible'; }
     if (ligero) { svg.querySelectorAll('.gl').forEach(el => el.remove()); svg.querySelectorAll('[filter]').forEach(el => el.removeAttribute('filter')); }   // los desenfoques cuestan en equipos modestos
 
     const P = {}, V = {}, T = {};
